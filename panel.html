@@ -334,14 +334,58 @@
   }
 
   async function pedirToken(cuerpo, tipo) {
-    const respuesta = await fetch(`${BASE.url}/auth/v1/token?grant_type=${tipo}`, {
-      method: 'POST',
-      headers: { apikey: BASE.clave, 'Content-Type': 'application/json' },
-      body: JSON.stringify(cuerpo),
-    });
+    let respuesta;
+    try {
+      respuesta = await fetch(`${BASE.url}/auth/v1/token?grant_type=${tipo}`, {
+        method: 'POST',
+        headers: {
+          apikey: BASE.clave,
+          // El servicio de acceso pide la clave por partida doble: en
+          // «apikey» y como portador. Con una sola responde «Invalid API
+          // key», que se confunde con una contraseña equivocada.
+          Authorization: `Bearer ${BASE.clave}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cuerpo),
+      });
+    } catch (falla) {
+      const e = new Error('No pudimos conectar con la base. Si el proyecto de Supabase ' +
+        'está pausado, entrá a supabase.com y tocá «Resume project».');
+      e.tipo = 'sin-conexion';
+      throw e;
+    }
+
     const datos = await respuesta.json().catch(() => ({}));
-    if (!respuesta.ok) throw new Error(datos.error_description || datos.msg || `Error ${respuesta.status}`);
-    return datos;
+    if (respuesta.ok) return datos;
+
+    const error = new Error(datos.error_description || datos.msg || datos.message || `Error ${respuesta.status}`);
+    error.estado = respuesta.status;
+    error.codigo = datos.error_code || datos.code || datos.error || '';
+    throw error;
+  }
+
+  /** Traduce el error de acceso sin inventar la causa */
+  function explicarAcceso(error) {
+    if (error.tipo === 'sin-conexion') return error.message;
+
+    const codigo = String(error.codigo || '');
+    const texto = String(error.message || '');
+
+    if (/invalid_credentials|invalid_grant/i.test(codigo) || /invalid login credentials/i.test(texto)) {
+      return 'Correo o contraseña incorrectos.';
+    }
+    if (/email_not_confirmed/i.test(codigo) || /email not confirmed/i.test(texto)) {
+      return 'El usuario existe pero le falta confirmar el correo. En Supabase → Authentication → Users, ' +
+             'abrilo y usá «Confirm email» (o borralo y crealo de nuevo tildando «Auto Confirm User»).';
+    }
+    if (/invalid api key|no api key/i.test(texto)) {
+      return 'La base rechazó la clave del sitio. Avisame y lo reviso.';
+    }
+    if (error.estado === 429 || /over_request_rate_limit/i.test(codigo)) {
+      return 'Demasiados intentos seguidos. Esperá un minuto y probá de nuevo.';
+    }
+    // Cualquier otra cosa se muestra tal cual: es lo que permite diagnosticarla
+    return `La base respondió: «${texto}»${error.estado ? ` (código ${error.estado})` : ''}.`;
   }
 
   /** Devuelve un permiso válido, renovándolo si hizo falta */
@@ -548,9 +592,7 @@
       mostrarPanel();
     } catch (error) {
       console.error(error);
-      aviso.textContent = /invalid/i.test(error.message)
-        ? 'Correo o contraseña incorrectos.'
-        : 'No pudimos entrar: ' + error.message;
+      aviso.textContent = explicarAcceso(error);
     } finally {
       boton.disabled = false;
     }
