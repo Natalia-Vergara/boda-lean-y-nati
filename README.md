@@ -24,15 +24,20 @@ sin código ve la invitación genérica («Estás cordialmente invitado»).
 ## Secciones
 
 0. **Sobre** — a pantalla completa, bordó aterciopelado con filete dorado y sello de lacre; muestra el nombre del invitado y sus lugares. Al tocar el sello, el lacre se despega, la solapa gira y la carta —«Lean & Nati · nos casamos · save the date · 27 · 11 · 2026»— sale despacio; recién a los 7 s la escena se disuelve en la portada.
+   **Se muestra una sola vez.** El navegador recuerda qué sobre abrió cada persona (`CONFIG.claveSobre`), y a partir de la segunda visita entra directo a la portada: 10,8 s la primera vez, 4 s las siguientes. Si le llega otro link personalizado, el sobre vuelve a aparecer con el nombre nuevo. Desde el cierre hay un «ver el sobre otra vez» que borra esa memoria.
 1. **Portada** — animación de entrada (L & N → Lean & Nati), promesa, «Nos casamos» y cuenta regresiva en tiempo real hasta el 27/11/2026.
 2. **Con inmensa alegría** — bienvenida.
-3. **Ceremonia & Celebración** — dirección completa, horarios (18:15 llegada / 18:30 puntual), botones **Ver mapa** (Google Maps) y **Fotos del lugar** (Instagram `@fincalajosefinaeventos`), más cuatro fotos reales de la finca.
+3. **Ceremonia & Celebración** — dirección completa, horarios (18:15 llegada / 18:30 puntual), botones **Ver mapa** (Google Maps) y **Fotos del lugar** (Instagram `@fincalajosefinaeventos`), **Agendá la fecha** (Google Calendar + `assets/boda-lean-y-nati.ics` para iPhone y Outlook), el bloque **Cómo llegar** (estacionamiento, tiempo desde La Plata, aviso de zona alejada) y cuatro fotos reales de la finca.
 4. **Dress code** — Formal, con los 5 colores a evitar (blanco, crema, beige, nude y bordo).
 5. **Regalos** — datos de la cuenta (Naranja X) con botones para copiar el alias y el CBU (Clipboard API + fallback) y aviso de confirmación.
 6. **Celebración sólo para adultos**.
 7. **Fotos** — link al álbum compartido del evento.
-8. **Confirmación de asistencia** — antes del **25 de octubre**. El botón «Confirmar aquí» abre una ventana con el formulario; al elegir «No puedo» quedan sólo el nombre y el botón de enviar. Una vez guardada la respuesta en la base, se ofrece **avisar también por WhatsApp**, para tenerla por duplicado.
-9. **Cierre** — despedida con las iniciales.
+8. **Preguntas frecuentes** — ocho respuestas plegables: chicos, estacionamiento, horario, dress code, lluvia, pulsera de barra libre, menú especial y fecha límite.
+9. **Confirmación de asistencia** — antes del **25 de octubre**. El botón «Confirmar aquí» abre una ventana con el formulario; al elegir «No puedo» quedan sólo el nombre y el botón de enviar. Una vez guardada la respuesta en la base, se ofrece **avisar también por WhatsApp**, para tenerla por duplicado.
+10. **Hashtag y compartir** — `#BodaLeanyNati` y un botón que usa el menú de compartir del teléfono (y copia el link donde no existe). Comparte siempre la invitación **general**: reenviar un link personalizado le daría a otra familia los lugares de quien lo recibió.
+11. **Cierre** — despedida con las iniciales.
+
+Además, un **atajo fijo «Confirmar asistencia»** abajo a la izquierda: aparece al dejar atrás la portada y se esconde al llegar a la sección de confirmación.
 
 ## Estructura del proyecto
 
@@ -47,6 +52,7 @@ boda/
 │
 └─ assets/
    ├─ fonts/             → Tipografías auto-hospedadas (woff2)
+   ├─ boda-lean-y-nati.ics → Evento para agendar (iPhone, Outlook)
    ├─ music/             → cancion.mp3 (agregar aquí la canción elegida)
    ├─ images/            → og-cover.jpg (vista previa al compartir)
    │   └─ finca/         → finca-01 … finca-04 (fotos del lugar)

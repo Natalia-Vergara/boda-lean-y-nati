@@ -92,6 +92,15 @@
   <audio id="audioBoda" src="assets/music/cancion.mp3" loop preload="none"></audio>
 
   <!-- ——— Botón volver arriba ——— -->
+  <!-- Atajo a la confirmación: aparece al bajar y se esconde al llegar a la sección -->
+  <button class="atajo" id="btnAtajoConfirmar" data-abrir="modalConfirmar" data-cursor="hover">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 7.5h16v11a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18.5v-11Z" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M4 8l8 6 8-6" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+    </svg>
+    <span>Confirmar asistencia</span>
+  </button>
+
   <button class="arriba" id="btnArriba" aria-label="Volver arriba" data-cursor="hover">
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M12 19V5m0 0-6 6m6-6 6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -345,6 +354,42 @@
             </a>
           </div>
         </article>
+
+        <!-- Agendar la fecha: Google para Android, .ics para iPhone y Outlook -->
+        <div class="agenda" data-anim="fade-up">
+          <p class="agenda__titulo">Agendá la fecha</p>
+          <div class="agenda__botones">
+            <a class="boton boton--contorno" target="_blank" rel="noopener" data-cursor="hover"
+               href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Casamiento%20de%20Lean%20%26%20Nati&amp;dates=20261127T213000Z%2F20261128T040000Z&amp;details=La%20ceremonia%20comienza%20puntual%20a%20las%2018%3A30.%20Te%20esperamos%20desde%20las%2018%3A15.%0A%0ADress%20code%3A%20elegante%20formal.%0A%0Ahttps%3A%2F%2Fnatalia-vergara.github.io%2Fboda-lean-y-nati%2F&amp;location=Finca%20La%20Josefina%2C%20Avenida%20Montevideo%20y%2077%2C%20Los%20Talas%2C%20Berisso">
+              <span class="boton__texto">Google Calendar</span>
+              <span class="boton__brillo" aria-hidden="true"></span>
+            </a>
+            <a class="boton boton--contorno" href="assets/boda-lean-y-nati.ics" download data-cursor="hover">
+              <span class="boton__texto">iPhone / Outlook</span>
+              <span class="boton__brillo" aria-hidden="true"></span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Cómo llegar -->
+        <div class="llegar" data-anim="fade-up" data-anim-delay="0.1">
+          <h3 class="llegar__titulo">Cómo llegar</h3>
+          <ul class="llegar__lista">
+            <li>
+              <b>En auto, sin problema.</b> La finca tiene <strong>estacionamiento
+              privado</strong>, así que podés venir con tu auto y dejarlo ahí toda la noche.
+            </li>
+            <li>
+              <b>Calculá unos 30 minutos</b> desde el centro de La Plata. Los Talas
+              queda sobre la Avenida Montevideo, pasando Berisso.
+            </li>
+            <li>
+              <b>Es un lugar alejado.</b> Si no venís en auto propio, dejá arreglado
+              de antemano quién te lleva y quién te busca — de noche no es una zona
+              donde se consigan remises al paso.
+            </li>
+          </ul>
+        </div>
 
         <!-- Fotos del lugar. Si alguna falta, se oculta sola (ver script.js).
              Guardarlas en assets/images/finca/ como finca-01.jpg … finca-04.jpg -->
@@ -629,6 +674,107 @@
     <!-- ============================================================
          CONFIRMACIÓN DE ASISTENCIA — vía WhatsApp
          ============================================================ -->
+    <!-- ============================================================
+         PREGUNTAS FRECUENTES — lo que si no está acá, te lo preguntan por privado
+         ============================================================ -->
+    <section class="faq seccion" id="preguntas">
+      <div class="contenedor contenedor--angosto">
+        <p class="etiqueta" data-anim="fade-up">Para que no te quedes con la duda</p>
+        <h2 class="titulo" data-anim="split">Preguntas frecuentes</h2>
+
+        <div class="faq__lista">
+          <details class="faq__item" data-anim="fade-up">
+            <summary class="faq__pregunta">
+              <span>¿Puedo llevar a los chicos?</span>
+              <svg class="faq__signo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </summary>
+            <div class="faq__respuesta"><p>Los queremos, y por eso lo pensamos con cuidado: <strong>esta vez los chicos se
+  quedan en casa</strong>. La finca no cuenta con seguridad ni con servicio de cuidado
+  para niños, y preferimos que nadie tenga que estar pendiente en lugar de disfrutar.
+  Tomalo como una noche libre para ustedes dos.</p></div>
+          </details>
+          <details class="faq__item" data-anim="fade-up" data-anim-delay="0.04">
+            <summary class="faq__pregunta">
+              <span>¿Hay estacionamiento?</span>
+              <svg class="faq__signo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </summary>
+            <div class="faq__respuesta"><p>Sí, la finca tiene estacionamiento privado. Podés venir en auto y dejarlo ahí.</p></div>
+          </details>
+          <details class="faq__item" data-anim="fade-up" data-anim-delay="0.08">
+            <summary class="faq__pregunta">
+              <span>¿A qué hora llego?</span>
+              <svg class="faq__signo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </summary>
+            <div class="faq__respuesta"><p>La ceremonia arranca <strong>18:30 en punto</strong>. Tratá de estar unos minutos
+  antes: te esperamos desde las 18:15.</p></div>
+          </details>
+          <details class="faq__item" data-anim="fade-up" data-anim-delay="0.12">
+            <summary class="faq__pregunta">
+              <span>¿Qué me pongo?</span>
+              <svg class="faq__signo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </summary>
+            <div class="faq__respuesta"><p><strong>Elegante formal.</strong> Y evitá el blanco, el crema, el beige, el nude
+  y el bordo — este último está reservado para las damas de honor.</p></div>
+          </details>
+          <details class="faq__item" data-anim="fade-up" data-anim-delay="0.16">
+            <summary class="faq__pregunta">
+              <span>¿Qué pasa si llueve?</span>
+              <svg class="faq__signo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </summary>
+            <div class="faq__respuesta"><p>Se hace igual. La finca tiene salón techado, así que la lluvia no cambia nada.</p></div>
+          </details>
+          <details class="faq__item" data-anim="fade-up" data-anim-delay="0.20">
+            <summary class="faq__pregunta">
+              <span>¿Cómo es lo de la pulsera?</span>
+              <svg class="faq__signo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </summary>
+            <div class="faq__respuesta"><p>A quienes confirmen que <strong>sí</strong> quieren barra libre se les entrega
+  una pulsera al llegar. Es para mayores de 21 años e incluye tragos libres durante
+  toda la fiesta. Por eso te pedimos el número al confirmar: es la cantidad que
+  encargamos.</p></div>
+          </details>
+          <details class="faq__item" data-anim="fade-up" data-anim-delay="0.24">
+            <summary class="faq__pregunta">
+              <span>¿Puedo pedir un menú especial?</span>
+              <svg class="faq__signo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </summary>
+            <div class="faq__respuesta"><p>Sí, por favor. Si sos celíaco, vegetariano o tenés alguna alergia, escribilo en
+  la aclaración cuando confirmes y lo coordinamos con la finca.</p></div>
+          </details>
+          <details class="faq__item" data-anim="fade-up" data-anim-delay="0.28">
+            <summary class="faq__pregunta">
+              <span>¿Hasta cuándo puedo confirmar?</span>
+              <svg class="faq__signo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </summary>
+            <div class="faq__respuesta"><p>Hasta el <strong>25 de octubre</strong>. Después de esa fecha no vamos a poder
+  hacer excepciones: tenemos que entregarle la lista definitiva a la finca, y sin
+  confirmación no van a poder dejarte entrar el día del evento. No es un capricho
+  nuestro, es cómo trabajan ellos.</p></div>
+          </details>
+        </div>
+
+        <p class="faq__pie" data-anim="fade-up">
+          ¿Quedó algo sin responder? Escribinos y lo vemos.
+        </p>
+      </div>
+    </section>
+
     <section class="rsvp seccion" id="confirmacion">
       <div class="contenedor contenedor--angosto">
         <!-- Sello decorativo -->
@@ -675,6 +821,35 @@
     </section>
 
     <!-- ============================================================
+         COMPARTIR — hashtag y link para reenviar la invitación
+         ============================================================ -->
+    <section class="compartir seccion" id="compartir">
+      <div class="contenedor contenedor--angosto">
+        <svg class="compartir__icono" viewBox="0 0 48 48" fill="none" aria-hidden="true" data-anim="dibujo">
+          <path class="trazo" d="M24 32V10M24 10l-7 7M24 10l7 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path class="trazo" d="M12 26v10a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V26" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+
+        <p class="etiqueta" data-anim="fade-up">Que no se pierda ninguna foto</p>
+        <h2 class="titulo" data-anim="split">Nuestro hashtag</h2>
+
+        <p class="compartir__hashtag" data-anim="fade-up" data-anim-delay="0.15">#BodaLeanyNati</p>
+        <p class="parrafo parrafo--suave" data-anim="fade-up" data-anim-delay="0.25">
+          Si subís algo de esa noche, ponelo. Así después encontramos todas
+          las fotos juntas y vemos la fiesta con los ojos de ustedes.
+        </p>
+
+        <div class="compartir__acciones" data-anim="fade-up" data-anim-delay="0.35">
+          <button class="boton boton--vino" type="button" id="btnCompartir" data-cursor="hover">
+            <span class="boton__texto">Compartir la invitación</span>
+            <span class="boton__brillo" aria-hidden="true"></span>
+          </button>
+        </div>
+        <p class="compartir__aviso" id="avisoCompartir" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- ============================================================
          FOOTER — despedida
          ============================================================ -->
     <footer class="cierre seccion--oscura" id="cierre">
@@ -691,7 +866,10 @@
         </p>
         <p class="cierre__firma" data-anim="fade-up" data-anim-delay="0.4">Con cariño,<br><strong>Lean &amp; Nat<span class="nombre-i">i</span></strong></p>
         <span class="cierre__fecha" data-anim="fade-up" data-anim-delay="0.5">27 · 11 · 2026</span>
-        <p class="cierre__credito">Invitación digital hecha con amor</p>
+        <p class="cierre__credito">
+          Invitación digital hecha con amor ·
+          <button class="cierre__revivir" type="button" id="btnVerSobre">ver el sobre otra vez</button>
+        </p>
       </div>
     </footer>
 

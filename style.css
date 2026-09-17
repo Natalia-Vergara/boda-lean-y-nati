@@ -867,6 +867,46 @@ body[data-estado="abierta"] .hero__scroll.hero__scroll--oculto { opacity: 0; }
 }
 .ceremonia__foto:hover img { transform: scale(1.05); }
 
+/* ————— 12b. AGENDAR LA FECHA ————— */
+.agenda {
+  max-width: 52ch; margin: 2.4rem auto 0;
+  display: grid; gap: 0.9rem; justify-items: center; text-align: center;
+}
+.agenda__titulo {
+  font-family: var(--f-botones); font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 0.28em; text-indent: 0.28em; text-transform: uppercase;
+  color: var(--dorado);
+}
+.agenda__botones { display: flex; gap: 0.8rem; flex-wrap: wrap; justify-content: center; }
+
+/* ————— 12c. CÓMO LLEGAR ————— */
+.llegar {
+  max-width: 56ch; margin: 2.6rem auto 0;
+  border: var(--borde-fino); border-radius: 5px;
+  background: rgba(255, 255, 255, 0.55);
+  padding: 1.6rem 1.6rem 1.7rem;
+  text-align: left;
+}
+.llegar__titulo {
+  font-family: var(--f-cursiva); font-style: italic; font-weight: 400;
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  color: var(--bordo); margin-bottom: 0.9rem;
+}
+.llegar__lista { list-style: none; display: grid; gap: 0.9rem; }
+.llegar__lista li {
+  font-family: var(--f-titulos); font-weight: 500;
+  font-size: 1rem; line-height: 1.75;
+  color: var(--tinta-suave);
+  padding-left: 1.1rem; position: relative;
+}
+.llegar__lista li::before {
+  content: ""; position: absolute; left: 0; top: 0.75em;
+  width: 5px; height: 5px; rotate: 45deg;
+  background: var(--dorado);
+}
+.llegar__lista b { color: var(--bordo); font-weight: 600; }
+.llegar__lista strong { color: var(--tinta); font-weight: 600; }
+
 /* ————— 13. DRESS CODE ————— */
 .dresscode { background: var(--papel-suave); }
 .dresscode__tarjeta {
@@ -1228,6 +1268,105 @@ body[data-estado="abierta"] .hero__scroll.hero__scroll--oculto { opacity: 0; }
   background: linear-gradient(90deg, transparent, rgba(169, 139, 84, 0.6), transparent);
 }
 .civil__acciones { display: flex; gap: 0.9rem; flex-wrap: wrap; justify-content: center; margin-top: 0.3rem; }
+
+/* ————— 18d2. PREGUNTAS FRECUENTES ————— */
+.faq { background: var(--papel-suave); }
+.faq__lista {
+  display: grid; gap: 0.7rem;
+  max-width: 60ch; margin: 2.4rem auto 0; text-align: left;
+}
+.faq__item {
+  border: var(--borde-fino); border-radius: 5px;
+  background: rgba(255, 255, 255, 0.6);
+  overflow: hidden;
+}
+.faq__item[open] { background: rgba(255, 255, 255, 0.92); }
+.faq__pregunta {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1.05rem 1.2rem;
+  cursor: pointer; list-style: none;
+  font-family: var(--f-titulos); font-weight: 600;
+  font-size: clamp(1rem, 2.2vw, 1.1rem);
+  color: var(--bordo);
+}
+.faq__pregunta::-webkit-details-marker { display: none; }
+.faq__pregunta span { flex: 1; }
+.faq__item:focus-within .faq__pregunta { outline: 2px solid var(--dorado); outline-offset: -2px; }
+.faq__signo {
+  width: 18px; height: 18px; flex: none;
+  color: var(--dorado);
+  transition: rotate 0.35s var(--suave);
+}
+.faq__item[open] .faq__signo { rotate: 180deg; }
+.faq__respuesta { padding: 0 1.2rem 1.2rem; }
+.faq__respuesta p {
+  font-family: var(--f-titulos); font-weight: 500;
+  font-size: 1rem; line-height: 1.8;
+  color: var(--tinta-suave);
+}
+.faq__respuesta strong { color: var(--bordo); font-weight: 600; }
+.faq__pie {
+  margin-top: 1.6rem;
+  font-family: var(--f-titulos); font-weight: 500;
+  font-size: 0.98rem; color: var(--tinta-tenue);
+}
+
+/* ————— 18d3. HASHTAG Y COMPARTIR ————— */
+.compartir__icono {
+  width: clamp(40px, 7.5vw, 48px);
+  margin: 0 auto 1.6rem; display: block;
+  color: var(--dorado);
+}
+.compartir__hashtag {
+  font-family: var(--f-cursiva); font-style: italic;
+  font-size: clamp(1.7rem, 6.5vw, 2.6rem);
+  color: var(--bordo);
+  margin: 0.6rem 0 1rem;
+  word-break: break-word;
+}
+.compartir__acciones { margin-top: 1.6rem; }
+.compartir__aviso {
+  margin-top: 0.9rem; min-height: 1.4em;
+  font-family: var(--f-botones); font-size: 0.72rem; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--dorado);
+}
+
+/* ————— 18d4. ATAJO FIJO A LA CONFIRMACIÓN ————— */
+/* La confirmación vive al final: sin esto hay que recorrer toda la tarjeta
+   cada vez. Va abajo a la izquierda, lejos del botón de música. */
+.atajo {
+  position: fixed; z-index: 80;
+  left: 1.4rem; bottom: 1.4rem;
+  max-width: min(calc(100vw - 7.4rem), 320px);
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.85rem 1.3rem;
+  border-radius: 100px;
+  border: 1px solid rgba(198, 173, 126, 0.5);
+  background: var(--bordo);
+  color: #FBF8F2;
+  box-shadow: 0 14px 34px -14px rgba(26, 18, 13, 0.8);
+  cursor: pointer;
+  font-family: var(--f-botones); font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  opacity: 0; visibility: hidden; transform: translateY(16px);
+  transition: opacity 0.5s var(--suave), transform 0.5s var(--suave), visibility 0.5s;
+}
+.atajo svg { width: 17px; height: 17px; flex: none; }
+.atajo span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.atajo--visible { opacity: 1; visibility: visible; transform: none; }
+.atajo:hover { background: var(--vino); }
+@media (max-width: 420px) {
+  .atajo { padding: 0.8rem 1rem; font-size: 0.66rem; gap: 0.5rem; }
+}
+
+/* Botón de texto en el cierre, para volver a ver el sobre */
+.cierre__revivir {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font: inherit; color: inherit;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.cierre__revivir:hover { color: var(--dorado-claro); }
 
 /* ————— 18e. FORMULARIOS EN VENTANA ————— */
 .modal {
