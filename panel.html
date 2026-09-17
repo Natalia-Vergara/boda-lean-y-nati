@@ -119,6 +119,28 @@
 
     .aviso { font-size: 0.88rem; color: var(--alerta); min-height: 1.2em; }
     .aviso:empty { min-height: 0; }
+    /* Lo que respondió el servidor, textual. Sirve para diagnosticar sin
+       tener que adivinar cuál de todas las causas posibles fue. */
+    .detalle {
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 0.7rem; color: var(--tinta-tenue);
+      margin: -0.5rem 0 0; word-break: break-word;
+    }
+    .detalle:empty { display: none; }
+
+    /* El navegador rellena solo la contraseña, y si guardó una vieja no hay
+       manera de darse cuenta: escondida, son todos puntitos iguales. */
+    .clave { position: relative; display: block; }
+    .clave input { padding-right: 3.4rem; }
+    .clave__ojo {
+      position: absolute; right: 0.5rem; top: 50%; translate: 0 -50%;
+      background: none; border: 0; cursor: pointer;
+      font-family: 'Montserrat', system-ui, sans-serif;
+      font-size: 0.64rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--tinta-tenue);
+      padding: 0.4rem 0.5rem; border-radius: 4px;
+    }
+    .clave__ojo:hover { color: var(--bordo); }
 
     /* ————— Encabezado del panel ————— */
     .barra {
@@ -242,11 +264,15 @@
 
       <label class="campo">
         <span class="campo__nombre">Contraseña</span>
-        <input type="password" name="password" required autocomplete="current-password">
+        <span class="clave">
+          <input type="password" name="password" required autocomplete="current-password">
+          <button class="clave__ojo" type="button" id="verClave" aria-label="Mostrar la contraseña">ver</button>
+        </span>
       </label>
 
       <button class="boton" type="submit" id="botonEntrar">Entrar</button>
       <p class="aviso" id="avisoAcceso" role="status" aria-live="polite"></p>
+      <p class="detalle" id="detalleAcceso"></p>
     </form>
   </section>
 
@@ -580,22 +606,41 @@
   $('#formAcceso').addEventListener('submit', async (e) => {
     e.preventDefault();
     const aviso = $('#avisoAcceso');
+    const detalle = $('#detalleAcceso');
     const boton = $('#botonEntrar');
     const datos = Object.fromEntries(new FormData(e.target));
+    // El correo suele llegar con un espacio de más del autocompletado o en
+    // mayúsculas del teclado del celular; la contraseña se manda tal cual.
+    const email = String(datos.email || '').trim().toLowerCase();
 
     boton.disabled = true;
     aviso.textContent = 'Entrando…';
+    detalle.textContent = '';
     try {
-      guardarSesion(await pedirToken({ email: datos.email, password: datos.password }, 'password'));
+      guardarSesion(await pedirToken({ email, password: datos.password }, 'password'));
       aviso.textContent = '';
       e.target.reset();
       mostrarPanel();
     } catch (error) {
       console.error(error);
       aviso.textContent = explicarAcceso(error);
+      detalle.textContent = [
+        error.codigo || null,
+        error.estado ? `HTTP ${error.estado}` : null,
+        `clave de ${String(datos.password || '').length} caracteres`,
+      ].filter(Boolean).join(' · ');
     } finally {
       boton.disabled = false;
     }
+  });
+
+  $('#verClave').addEventListener('click', () => {
+    const campo = $('input[name="password"]');
+    const oculta = campo.type === 'password';
+    campo.type = oculta ? 'text' : 'password';
+    $('#verClave').textContent = oculta ? 'ocultar' : 'ver';
+    $('#verClave').setAttribute('aria-label', oculta ? 'Ocultar la contraseña' : 'Mostrar la contraseña');
+    campo.focus();
   });
 
   $('#botonRecargar').addEventListener('click', cargar);
