@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel · Lean &amp; Nati</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <style>
+    /* ============================================================
+       PANEL PRIVADO — lista de confirmaciones
+       Vive aparte de la invitación: acá no hay animaciones ni adornos,
+       sólo los números y la lista, legibles de un vistazo en el celular.
+       ============================================================ */
+    :root {
+      --papel:      #FBF8F2;
+      --superficie: #FFFFFF;
+      --tinta:      #3D2E2A;
+      --tinta-suave:#6B5750;
+      --tinta-tenue:#8C7970;
+      --bordo:      #61152A;
+      --dorado:     #A98B54;
+      --linea:      #E4D9C6;
+      --linea-suave:#F0E8DA;
+      --alerta:     #8A2B1F;
+      --sombra:     0 1px 2px rgba(61,46,42,0.05), 0 8px 24px -16px rgba(61,46,42,0.25);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-tema="claro"]) {
+        --papel:      #17120F;
+        --superficie: #211A16;
+        --tinta:      #F2E9DC;
+        --tinta-suave:#C3B2A5;
+        --tinta-tenue:#9C8B7E;
+        --bordo:      #E0A9B8;
+        --dorado:     #D2B784;
+        --linea:      #3A2C25;
+        --linea-suave:#2B211B;
+        --alerta:     #EFA79B;
+        --sombra:     0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -16px rgba(0,0,0,0.6);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    /* Las clases de abajo declaran «display», que le gana al hidden del
+       navegador; sin esto la pantalla de acceso queda visible bajo el panel. */
+    [hidden] { display: none !important; }
+    body {
+      margin: 0;
+      background: var(--papel);
+      color: var(--tinta);
+      font-family: 'Poppins', system-ui, sans-serif;
+      font-weight: 300;
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; margin: 0; }
+
+    .hoja { max-width: 1040px; margin: 0 auto; padding: 1.6rem 1.1rem 4rem; }
+
+    /* ————— Acceso ————— */
+    .acceso { min-height: 100svh; display: grid; place-items: center; padding: 1.5rem; }
+    .acceso__caja {
+      width: min(100%, 380px);
+      background: var(--superficie);
+      border: 1px solid var(--linea);
+      border-radius: 8px;
+      box-shadow: var(--sombra);
+      padding: 2.2rem 1.7rem;
+      display: grid; gap: 0.9rem;
+    }
+    .acceso__marca {
+      font-family: 'Pinyon Script', cursive;
+      font-size: 2.1rem; line-height: 1;
+      color: var(--bordo); text-align: center;
+    }
+    .acceso__titulo {
+      text-align: center; font-size: 1.35rem;
+      margin-bottom: 0.3rem;
+    }
+    .acceso__ayuda {
+      text-align: center; font-size: 0.86rem; color: var(--tinta-tenue);
+      margin: -0.4rem 0 0.6rem;
+    }
+
+    label.campo { display: grid; gap: 0.3rem; }
+    .campo__nombre {
+      font-size: 0.66rem; font-weight: 500; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--tinta-tenue);
+    }
+    input[type="email"], input[type="password"], input[type="search"] {
+      font-family: inherit; font-size: 1rem; color: var(--tinta);
+      background: var(--papel);
+      border: 1px solid var(--linea);
+      border-radius: 5px;
+      padding: 0.7rem 0.8rem;
+      width: 100%;
+    }
+    input:focus-visible { outline: 2px solid var(--dorado); outline-offset: 1px; }
+
+    .boton {
+      font-family: 'Montserrat', system-ui, sans-serif;
+      font-size: 0.74rem; font-weight: 600;
+      letter-spacing: 0.16em; text-indent: 0.16em; text-transform: uppercase;
+      color: #FBF8F2; background: #61152A;
+      border: 0; border-radius: 100px;
+      padding: 0.85rem 1.4rem;
+      cursor: pointer;
+    }
+    .boton:disabled { opacity: 0.55; cursor: progress; }
+    .boton--suave {
+      background: transparent; color: var(--tinta-suave);
+      border: 1px solid var(--linea);
+      padding: 0.55rem 1rem; font-size: 0.66rem;
+    }
+    .boton--suave:hover { border-color: var(--dorado); color: var(--bordo); }
+
+    .aviso { font-size: 0.88rem; color: var(--alerta); min-height: 1.2em; }
+    .aviso:empty { min-height: 0; }
+
+    /* ————— Encabezado del panel ————— */
+    .barra {
+      display: flex; flex-wrap: wrap; align-items: baseline;
+      gap: 0.5rem 1rem; margin-bottom: 1.6rem;
+    }
+    .barra h1 { font-size: clamp(1.5rem, 4.5vw, 2rem); }
+    .barra__fecha { font-size: 0.8rem; color: var(--tinta-tenue); }
+    .barra__acciones { margin-left: auto; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+    /* ————— Números grandes —————
+       No hay gráfico: con cuatro cifras y una lista alcanza, y un gráfico
+       de cinco barras diría menos que los propios números. */
+    .cifras {
+      display: grid; gap: 0.7rem;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      margin-bottom: 1.6rem;
+    }
+    .cifra {
+      background: var(--superficie);
+      border: 1px solid var(--linea);
+      border-radius: 7px;
+      padding: 1rem 1.1rem;
+      box-shadow: var(--sombra);
+    }
+    .cifra__valor {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 600; font-size: 2.4rem; line-height: 1.05;
+      color: var(--bordo);
+      /* Cormorant trae cifras de estilo antiguo: el 1 y el 3 quedan
+         achicados y se leen mal en un número suelto. */
+      font-variant-numeric: lining-nums tabular-nums;
+      font-feature-settings: 'lnum' 1, 'tnum' 1;
+    }
+    .cifra--tenue .cifra__valor { color: var(--tinta-suave); }
+    .cifra__nombre {
+      font-size: 0.68rem; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--tinta-tenue);
+      margin-top: 0.35rem;
+    }
+    .cifra__detalle { font-size: 0.8rem; color: var(--tinta-tenue); margin-top: 0.2rem; }
+
+    /* ————— Bloques ————— */
+    .bloque { margin-bottom: 2.4rem; }
+    .bloque__cabeza {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1rem;
+      margin-bottom: 0.8rem;
+    }
+    .bloque__cabeza h2 { font-size: 1.3rem; }
+    .bloque__cabeza .boton--suave { margin-left: auto; }
+    .buscador { flex: 1 1 200px; max-width: 320px; }
+
+    .tabla-envoltura {
+      overflow-x: auto;
+      background: var(--superficie);
+      border: 1px solid var(--linea);
+      border-radius: 7px;
+      box-shadow: var(--sombra);
+    }
+    table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 0.7rem 0.85rem; border-bottom: 1px solid var(--linea-suave); vertical-align: top; }
+    th {
+      font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--tinta-tenue);
+      border-bottom-color: var(--linea);
+      white-space: nowrap;
+    }
+    tr:last-child td { border-bottom: 0; }
+    td.num { font-variant-numeric: tabular-nums; text-align: right; }
+    .vacio { padding: 1.6rem; text-align: center; color: var(--tinta-tenue); font-size: 0.9rem; }
+
+    /* El estado se lee por la palabra; el color sólo acompaña */
+    .estado {
+      display: inline-block; white-space: nowrap;
+      font-family: 'Montserrat', system-ui, sans-serif;
+      font-size: 0.62rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem; border-radius: 100px;
+    }
+    .estado--si { background: #61152A; color: #FBF8F2; }
+    .estado--no { background: transparent; color: var(--tinta-tenue); border: 1px solid var(--linea); }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-tema="claro"]) .estado--si { background: #E0A9B8; color: #17120F; }
+    }
+
+    .borrar {
+      background: none; border: 0; cursor: pointer; padding: 0.2rem 0.4rem;
+      color: var(--tinta-tenue); font-size: 1rem; line-height: 1;
+      border-radius: 4px;
+    }
+    .borrar:hover { color: var(--alerta); }
+
+    .pendientes { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+    .pendiente {
+      background: var(--superficie);
+      border: 1px solid var(--linea);
+      border-radius: 100px;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.85rem;
+      color: var(--tinta-suave);
+    }
+    .pendiente b { font-weight: 500; color: var(--tinta); }
+
+    .nota-pie { font-size: 0.8rem; color: var(--tinta-tenue); margin-top: 0.7rem; }
+    a { color: var(--bordo); }
+  </style>
+</head>
+<body>
+
+  <!-- ————— Pantalla de acceso ————— -->
+  <section class="acceso" id="acceso">
+    <form class="acceso__caja" id="formAcceso">
+      <p class="acceso__marca">Lean &amp; Nati</p>
+      <h1 class="acceso__titulo">Panel de confirmaciones</h1>
+      <p class="acceso__ayuda">Sólo para los novios</p>
+
+      <label class="campo">
+        <span class="campo__nombre">Correo</span>
+        <input type="email" name="email" required autocomplete="username" inputmode="email">
+      </label>
+
+      <label class="campo">
+        <span class="campo__nombre">Contraseña</span>
+        <input type="password" name="password" required autocomplete="current-password">
+      </label>
+
+      <button class="boton" type="submit" id="botonEntrar">Entrar</button>
+      <p class="aviso" id="avisoAcceso" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <!-- ————— Panel ————— -->
+  <main class="hoja" id="panel" hidden>
+    <div class="barra">
+      <div>
+        <h1>Confirmaciones</h1>
+        <p class="barra__fecha" id="actualizado"></p>
+      </div>
+      <div class="barra__acciones">
+        <button class="boton boton--suave" type="button" id="botonRecargar">Actualizar</button>
+        <button class="boton boton--suave" type="button" id="botonSalir">Salir</button>
+      </div>
+    </div>
+
+    <p class="aviso" id="avisoPanel" role="status" aria-live="polite"></p>
+
+    <div class="cifras" id="cifras"></div>
+
+    <section class="bloque">
+      <div class="bloque__cabeza">
+        <h2>Respuestas</h2>
+        <input class="buscador" type="search" id="buscador" placeholder="Buscar por nombre…" aria-label="Buscar por nombre">
+        <button class="boton boton--suave" type="button" id="botonCsv">Descargar Excel</button>
+      </div>
+      <div class="tabla-envoltura" id="tablaConfirmaciones"></div>
+    </section>
+
+    <section class="bloque" id="bloquePendientes" hidden>
+      <div class="bloque__cabeza">
+        <h2>Todavía no respondieron</h2>
+      </div>
+      <div class="pendientes" id="pendientes"></div>
+      <p class="nota-pie">Sale de comparar <code>invitados.js</code> con las respuestas recibidas. Sólo aparecen quienes tienen link personalizado.</p>
+    </section>
+
+    <section class="bloque">
+      <div class="bloque__cabeza">
+        <h2>Canciones sugeridas</h2>
+        <button class="boton boton--suave" type="button" id="botonCsvCanciones">Descargar Excel</button>
+      </div>
+      <div class="tabla-envoltura" id="tablaCanciones"></div>
+    </section>
+  </main>
+
+  <script src="invitados.js"></script>
+  <script>
+  'use strict';
+
+  /* ————— Conexión (los mismos datos públicos que usa la invitación) ————— */
+  const BASE = {
+    url: 'https://mjvhfvcpkrzpufrpklrv.supabase.co',
+    clave: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdmhmdmNwa3J6cHVmcnBrbHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MTc4NjksImV4cCI6MjEwNDQ5Mzg2OX0.r9gSC7MoNaAxQQo3oQtZmZXkMyOlYDJe6G1rphYhb50',
+  };
+  const LLAVE_SESION = 'nyl-panel-sesion';
+
+  const $ = (sel, raiz = document) => raiz.querySelector(sel);
+
+  let sesion = null;        // { access_token, refresh_token, vence }
+  let confirmaciones = [];
+  let canciones = [];
+
+  /* ————— Sesión ————— */
+  function guardarSesion(datos) {
+    sesion = {
+      access_token: datos.access_token,
+      refresh_token: datos.refresh_token,
+      // Un minuto de margen, para no usar un permiso recién vencido
+      vence: Date.now() + (datos.expires_in - 60) * 1000,
+    };
+    try { localStorage.setItem(LLAVE_SESION, JSON.stringify(sesion)); } catch (e) { /* modo privado */ }
+  }
+
+  function recuperarSesion() {
+    try {
+      const guardada = localStorage.getItem(LLAVE_SESION);
+      if (guardada) sesion = JSON.parse(guardada);
+    } catch (e) { sesion = null; }
+  }
+
+  function olvidarSesion() {
+    sesion = null;
+    try { localStorage.removeItem(LLAVE_SESION); } catch (e) { /* nada */ }
+  }
+
+  async function pedirToken(cuerpo, tipo) {
+    const respuesta = await fetch(`${BASE.url}/auth/v1/token?grant_type=${tipo}`, {
+      method: 'POST',
+      headers: { apikey: BASE.clave, 'Content-Type': 'application/json' },
+      body: JSON.stringify(cuerpo),
+    });
+    const datos = await respuesta.json().catch(() => ({}));
+    if (!respuesta.ok) throw new Error(datos.error_description || datos.msg || `Error ${respuesta.status}`);
+    return datos;
+  }
+
+  /** Devuelve un permiso válido, renovándolo si hizo falta */
+  async function permiso() {
+    if (!sesion) throw new Error('sin-sesion');
+    if (Date.now() < sesion.vence) return sesion.access_token;
+    const datos = await pedirToken({ refresh_token: sesion.refresh_token }, 'refresh_token');
+    guardarSesion(datos);
+    return sesion.access_token;
+  }
+
+  /* ————— Lectura de la base ————— */
+  async function leer(tabla) {
+    const token = await permiso();
+    const respuesta = await fetch(
+      `${BASE.url}/rest/v1/${tabla}?select=*&order=creado_en.desc`,
+      { headers: { apikey: BASE.clave, Authorization: `Bearer ${token}` } }
+    );
+    if (!respuesta.ok) throw new Error(`${tabla}: ${respuesta.status} ${await respuesta.text()}`);
+    return respuesta.json();
+  }
+
+  async function borrar(tabla, id) {
+    const token = await permiso();
+    const respuesta = await fetch(`${BASE.url}/rest/v1/${tabla}?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: { apikey: BASE.clave, Authorization: `Bearer ${token}` },
+    });
+    if (!respuesta.ok) throw new Error(`${respuesta.status} ${await respuesta.text()}`);
+  }
+
+  /* ————— Presentación ————— */
+  const escapar = (t) => String(t == null ? '' : t)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  const viene = (fila) => String(fila.asiste || '').startsWith('Sí');
+
+  function fecha(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' }) +
+      ' · ' + d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function pintarCifras() {
+    const siVienen = confirmaciones.filter(viene);
+    const noVienen = confirmaciones.filter((f) => !viene(f));
+    const personas = siVienen.reduce((t, f) => t + (Number(f.personas) || 0), 0);
+    const pulseras = siVienen.reduce((t, f) => t + (Number(f.alcohol) || 0), 0);
+
+    const celdas = [
+      { valor: personas, nombre: 'Personas confirmadas', detalle: `${siVienen.length} respuesta${siVienen.length === 1 ? '' : 's'}` },
+      { valor: pulseras, nombre: 'Pulseras de barra libre', detalle: 'Para pedir a la finca' },
+      { valor: noVienen.length, nombre: 'No pueden venir', tenue: true },
+      { valor: confirmaciones.length, nombre: 'Respuestas en total', tenue: true },
+    ];
+
+    $('#cifras').innerHTML = celdas.map((c) => `
+      <div class="cifra${c.tenue ? ' cifra--tenue' : ''}">
+        <p class="cifra__valor">${c.valor}</p>
+        <p class="cifra__nombre">${escapar(c.nombre)}</p>
+        ${c.detalle ? `<p class="cifra__detalle">${escapar(c.detalle)}</p>` : ''}
+      </div>`).join('');
+  }
+
+  function pintarConfirmaciones() {
+    const busca = $('#buscador').value.trim().toLowerCase();
+    const filas = busca
+      ? confirmaciones.filter((f) =>
+          `${f.nombre || ''} ${f.invitado || ''}`.toLowerCase().includes(busca))
+      : confirmaciones;
+
+    if (!filas.length) {
+      $('#tablaConfirmaciones').innerHTML =
+        `<p class="vacio">${confirmaciones.length ? 'Ningún nombre coincide con la búsqueda.' : 'Todavía no llegó ninguna respuesta.'}</p>`;
+      return;
+    }
+
+    $('#tablaConfirmaciones').innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Cuándo</th><th>Nombre</th><th>Estado</th>
+            <th class="num">Personas</th><th class="num">Pulseras</th>
+            <th>Aclaración</th><th>Invitación</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filas.map((f) => `
+            <tr>
+              <td>${escapar(fecha(f.creado_en))}</td>
+              <td>${escapar(f.nombre)}</td>
+              <td><span class="estado estado--${viene(f) ? 'si' : 'no'}">${viene(f) ? 'Asiste' : 'No puede'}</span></td>
+              <td class="num">${viene(f) ? (Number(f.personas) || 0) : '—'}</td>
+              <td class="num">${viene(f) ? (Number(f.alcohol) || 0) : '—'}</td>
+              <td>${escapar(f.nota) || '—'}</td>
+              <td>${escapar(f.invitado) || '—'}</td>
+              <td><button class="borrar" type="button" data-borrar="${f.id}" title="Borrar esta respuesta" aria-label="Borrar la respuesta de ${escapar(f.nombre)}">✕</button></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function pintarCanciones() {
+    if (!canciones.length) {
+      $('#tablaCanciones').innerHTML = '<p class="vacio">Todavía no sugirieron ninguna canción.</p>';
+      return;
+    }
+    $('#tablaCanciones').innerHTML = `
+      <table>
+        <thead><tr><th>Cuándo</th><th>Quién</th><th>Canción</th><th>Link</th></tr></thead>
+        <tbody>
+          ${canciones.map((c) => `
+            <tr>
+              <td>${escapar(fecha(c.creado_en))}</td>
+              <td>${escapar(c.nombre)}</td>
+              <td>${escapar(c.cancion)}</td>
+              <td>${c.link ? `<a href="${escapar(c.link)}" target="_blank" rel="noopener">Abrir</a>` : '—'}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  /** Quiénes de la lista de invitados todavía no contestaron */
+  function pintarPendientes() {
+    const lista = window.INVITADOS || {};
+    const codigos = Object.keys(lista);
+    if (!codigos.length) return;
+
+    const respondieron = new Set(confirmaciones.map((f) => f.codigo).filter(Boolean));
+    const faltan = codigos.filter((c) => !respondieron.has(c));
+
+    $('#bloquePendientes').hidden = false;
+    $('#pendientes').innerHTML = faltan.length
+      ? faltan.map((c) => `<span class="pendiente"><b>${escapar(lista[c].nombre)}</b> · ${lista[c].pases}</span>`).join('')
+      : '<span class="pendiente">Contestaron todos 🎉</span>';
+  }
+
+  /* ————— Descarga para Excel ————— */
+  function descargarCsv(nombreArchivo, encabezados, filas) {
+    const celda = (v) => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+    const texto = [encabezados, ...filas].map((f) => f.map(celda).join(';')).join('\r\n');
+    // El BOM le avisa a Excel que el archivo está en UTF-8, si no rompe los acentos
+    const blob = new Blob(['﻿' + texto], { type: 'text/csv;charset=utf-8;' });
+    const enlace = document.createElement('a');
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = nombreArchivo;
+    enlace.click();
+    setTimeout(() => URL.revokeObjectURL(enlace.href), 1000);
+  }
+
+  /* ————— Carga ————— */
+  async function cargar() {
+    const aviso = $('#avisoPanel');
+    aviso.textContent = '';
+    $('#botonRecargar').disabled = true;
+    try {
+      [confirmaciones, canciones] = await Promise.all([leer('confirmaciones'), leer('canciones')]);
+      pintarCifras();
+      pintarConfirmaciones();
+      pintarCanciones();
+      pintarPendientes();
+      $('#actualizado').textContent = 'Actualizado ' + new Date().toLocaleString('es-AR',
+        { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    } catch (error) {
+      console.error(error);
+      if (String(error.message).includes('sin-sesion') || String(error).includes('refresh')) {
+        olvidarSesion();
+        mostrarAcceso('Tu sesión venció. Entrá de nuevo.');
+        return;
+      }
+      aviso.textContent = 'No pudimos leer la base. Si el proyecto de Supabase está pausado, ' +
+        'entrá a supabase.com y tocá «Resume project».';
+    } finally {
+      $('#botonRecargar').disabled = false;
+    }
+  }
+
+  function mostrarPanel() {
+    $('#acceso').hidden = true;
+    $('#panel').hidden = false;
+    cargar();
+  }
+
+  function mostrarAcceso(mensaje) {
+    $('#panel').hidden = true;
+    $('#acceso').hidden = false;
+    $('#avisoAcceso').textContent = mensaje || '';
+  }
+
+  /* ————— Eventos ————— */
+  $('#formAcceso').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const aviso = $('#avisoAcceso');
+    const boton = $('#botonEntrar');
+    const datos = Object.fromEntries(new FormData(e.target));
+
+    boton.disabled = true;
+    aviso.textContent = 'Entrando…';
+    try {
+      guardarSesion(await pedirToken({ email: datos.email, password: datos.password }, 'password'));
+      aviso.textContent = '';
+      e.target.reset();
+      mostrarPanel();
+    } catch (error) {
+      console.error(error);
+      aviso.textContent = /invalid/i.test(error.message)
+        ? 'Correo o contraseña incorrectos.'
+        : 'No pudimos entrar: ' + error.message;
+    } finally {
+      boton.disabled = false;
+    }
+  });
+
+  $('#botonRecargar').addEventListener('click', cargar);
+  $('#botonSalir').addEventListener('click', () => { olvidarSesion(); mostrarAcceso(); });
+  $('#buscador').addEventListener('input', pintarConfirmaciones);
+
+  $('#tablaConfirmaciones').addEventListener('click', async (e) => {
+    const boton = e.target.closest('[data-borrar]');
+    if (!boton) return;
+    const fila = confirmaciones.find((f) => String(f.id) === boton.dataset.borrar);
+    if (!fila || !confirm(`¿Borrar la respuesta de ${fila.nombre}? No se puede deshacer.`)) return;
+    try {
+      await borrar('confirmaciones', fila.id);
+      await cargar();
+    } catch (error) {
+      console.error(error);
+      $('#avisoPanel').textContent = 'No pudimos borrar esa fila.';
+    }
+  });
+
+  $('#botonCsv').addEventListener('click', () => {
+    descargarCsv('confirmaciones.csv',
+      ['Fecha', 'Nombre', 'Asiste', 'Personas', 'Pulseras', 'Aclaración', 'Invitación', 'Código'],
+      confirmaciones.map((f) => [
+        fecha(f.creado_en), f.nombre, f.asiste,
+        viene(f) ? (f.personas || 0) : 0,
+        viene(f) ? (f.alcohol || 0) : 0,
+        f.nota || '', f.invitado || '', f.codigo || '',
+      ]));
+  });
+
+  $('#botonCsvCanciones').addEventListener('click', () => {
+    descargarCsv('canciones.csv', ['Fecha', 'Quién', 'Canción', 'Link'],
+      canciones.map((c) => [fecha(c.creado_en), c.nombre, c.cancion, c.link || '']));
+  });
+
+  /* ————— Arranque ————— */
+  recuperarSesion();
+  if (sesion && sesion.refresh_token) mostrarPanel(); else mostrarAcceso();
+  </script>
+</body>
+</html>

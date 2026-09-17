@@ -31,7 +31,7 @@ sin código ve la invitación genérica («Estás cordialmente invitado»).
 5. **Regalos** — datos de la cuenta (Naranja X) con botones para copiar el alias y el CBU (Clipboard API + fallback) y aviso de confirmación.
 6. **Celebración sólo para adultos**.
 7. **Fotos** — link al álbum compartido del evento.
-8. **Confirmación de asistencia** — antes del **25 de octubre**, botón «Confirmar aquí» que abre WhatsApp con mensaje predefinido.
+8. **Confirmación de asistencia** — antes del **25 de octubre**. El botón «Confirmar aquí» abre una ventana con el formulario; al elegir «No puedo» quedan sólo el nombre y el botón de enviar. Una vez guardada la respuesta en la base, se ofrece **avisar también por WhatsApp**, para tenerla por duplicado.
 9. **Cierre** — despedida con las iniciales.
 
 ## Estructura del proyecto
@@ -39,6 +39,7 @@ sin código ve la invitación genérica («Estás cordialmente invitado»).
 ```
 boda/
 │  index.html            → Estructura de la invitación (SEO, OpenGraph, Schema.org)
+│  panel.html            → Panel privado de confirmaciones (entra con usuario y clave)
 │  style.css             → Sistema de diseño completo (paleta, tipografías, secciones)
 │  script.js             → Animaciones GSAP, Lenis, cuenta regresiva, copiar alias
 │  manifest.webmanifest  → Manifest PWA
@@ -145,6 +146,65 @@ create policy "cualquiera puede confirmar"
 
 create policy "cualquiera puede sugerir"
   on canciones for insert to anon with check (true);
+```
+
+## Panel privado de confirmaciones
+
+[`panel.html`](panel.html) es una página aparte —no está enlazada desde la
+invitación— donde los novios entran con correo y contraseña y ven:
+
+- **Los números**: personas confirmadas, pulseras de barra libre a pedir,
+  cuántos no pueden venir y cuántas respuestas llegaron.
+- **La lista completa**, con buscador y un botón para borrar una fila (útil
+  para limpiar las pruebas).
+- **Quiénes todavía no respondieron**, comparando `invitados.js` contra las
+  respuestas recibidas.
+- **Las canciones sugeridas.**
+- **Descargar Excel** (CSV con BOM, se abre bien con acentos).
+
+```
+https://natalia-vergara.github.io/boda-lean-y-nati/panel.html
+```
+
+### Por qué es seguro
+
+La clave que viaja en la página es la `anon`, la misma que ya es pública, y
+**con ella sola no se puede leer nada**: las políticas de la base sólo
+permiten insertar. Leer requiere haber iniciado sesión, y la base comprueba
+el correo de quien entró. Esto lo decide PostgreSQL, no el navegador: no
+alcanza con abrir la consola y trucar la página.
+
+### Cómo habilitarlo (una sola vez)
+
+**1. Crear el usuario.** En Supabase → *Authentication* → *Users* →
+**Add user** → *Create new user*. Poner el correo y una contraseña larga, y
+tildar **Auto Confirm User**.
+
+**2. Cerrar los registros.** En *Authentication* → *Sign In / Providers* →
+*Email*, **desactivar «Allow new users to sign up»**. Sin esto, cualquiera
+podría crearse una cuenta y leer las confirmaciones.
+
+**3. Dar permiso de lectura a ese correo.** En el *SQL Editor*, reemplazando
+el correo de ejemplo por el real (se pueden poner varios separados por coma):
+
+```sql
+-- Sólo estos correos pueden leer y borrar. Sin esto, el panel entra
+-- pero la lista aparece vacía.
+drop policy if exists "los novios leen las confirmaciones" on confirmaciones;
+drop policy if exists "los novios borran confirmaciones"   on confirmaciones;
+drop policy if exists "los novios leen las canciones"      on canciones;
+
+create policy "los novios leen las confirmaciones"
+  on confirmaciones for select to authenticated
+  using ( (auth.jwt() ->> 'email') in ('TU-MAIL@ejemplo.com') );
+
+create policy "los novios borran confirmaciones"
+  on confirmaciones for delete to authenticated
+  using ( (auth.jwt() ->> 'email') in ('TU-MAIL@ejemplo.com') );
+
+create policy "los novios leen las canciones"
+  on canciones for select to authenticated
+  using ( (auth.jwt() ->> 'email') in ('TU-MAIL@ejemplo.com') );
 ```
 
 ### El proyecto se pausa solo (plan gratuito)

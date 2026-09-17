@@ -508,7 +508,7 @@ function cerrarVentana() {
   if (!ventanaAbierta) return;
   const ventana = ventanaAbierta;
   ventana.classList.remove('modal--visible');
-  setTimeout(() => { ventana.hidden = true; }, 350);
+  setTimeout(() => { ventana.hidden = true; reiniciarVentana(ventana); }, 350);
   ventanaAbierta = null;
   if (lenis) lenis.start();
   if (botonQueAbrio) botonQueAbrio.focus({ preventScroll: true });
@@ -545,6 +545,8 @@ function iniciarCampoBarra() {
   const alcohol = $('input[name="alcohol"]', form);
   const personas = $('input[name="personas"]', form);
   const campoPersonas = personas && personas.closest('.campo');
+  const campoNota = $('[data-campo-nota]', form);
+  const nota = $('input[name="nota"]', form);
   if (!campo || !alcohol) return;
 
   const limitar = () => {
@@ -553,8 +555,9 @@ function iniciarCampoBarra() {
     if (Number(alcohol.value) > total) alcohol.value = String(total);
   };
 
-  // Quien no puede venir sólo completa nombre y comentario: preguntarle
-  // cuántos asisten o cuántas pulseras necesita no tiene sentido.
+  // Quien no puede venir sólo deja su nombre. Cuántos asisten, cuántas
+  // pulseras o si es celíaco son preguntas para quien sí viene; dejarlas
+  // a la vista hace pensar que hay algo más para completar.
   const alternar = () => {
     const elegida = $('input[name="asiste"]:checked', form);
     const viene = !!elegida && elegida.value.startsWith('Sí');
@@ -562,6 +565,8 @@ function iniciarCampoBarra() {
     alcohol.required = viene;
     if (!viene) alcohol.value = '';
     if (campoPersonas) campoPersonas.hidden = !viene;
+    if (campoNota) campoNota.hidden = !viene;
+    if (nota && !viene) nota.value = '';
   };
 
   $$('input[name="asiste"]', form).forEach((r) => r.addEventListener('change', alternar));
@@ -674,19 +679,49 @@ function conectarFormulario(form, tabla, armarMensaje) {
     estado.textContent = 'Enviando…';
     try {
       await guardarEnBase(tabla, armarFila(tabla, datos));
-      estado.textContent = '¡Gracias! Recibimos tu respuesta ❤️';
-      form.reset();
-      setTimeout(cerrarVentana, 2200);
+      estado.textContent = '';
+      // Guardado en la base. El segundo aviso —el de WhatsApp— es a
+      // propósito un paso aparte: si se abriera solo, el navegador lo
+      // bloquearía por ser una ventana que el invitado no pidió.
+      mostrarHecho(form, enlaceWhatsapp(armarMensaje(datos)));
     } catch (error) {
       console.error('No se pudo guardar:', error);
       // Si la base falla, el invitado no se queda sin poder avisar
       estado.innerHTML = 'No pudimos guardar tu respuesta en este momento. ' +
-        `<a href="https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(armarMensaje(datos))}" ` +
+        `<a href="${enlaceWhatsapp(armarMensaje(datos))}" ` +
         'target="_blank" rel="noopener">Envialo por WhatsApp</a>.';
     } finally {
       boton.disabled = false;
     }
   });
+}
+
+/** Link de WhatsApp a los novios con el mensaje ya escrito */
+function enlaceWhatsapp(mensaje) {
+  return `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(mensaje)}`;
+}
+
+/** Cambia el formulario por la pantalla de «listo» con el aviso por WhatsApp */
+function mostrarHecho(form, urlWhatsapp) {
+  const hecho = $('.modal__hecho', form.parentElement);
+  if (!hecho) { form.reset(); setTimeout(cerrarVentana, 2200); return; }
+
+  const boton = $('[data-whatsapp]', hecho);
+  if (boton) boton.href = urlWhatsapp;
+  form.hidden = true;
+  hecho.hidden = false;
+}
+
+/** Deja la ventana como estaba, para quien la vuelva a abrir */
+function reiniciarVentana(ventana) {
+  const form = $('.modal__form', ventana);
+  const hecho = $('.modal__hecho', ventana);
+  if (!form || !hecho || hecho.hidden) return;
+  hecho.hidden = true;
+  form.hidden = false;
+  form.reset();
+  const estado = $('.modal__estado', form);
+  if (estado) estado.textContent = '';
 }
 
 /* ————— 11. ÁLBUM COMPARTIDO ————— */

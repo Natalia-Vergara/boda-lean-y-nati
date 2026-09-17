@@ -699,8 +699,9 @@
 
   <!-- ============================================================
        FORMULARIOS EN VENTANA
-       Se envían al formulario configurado en script.js (CONFIG.formularios)
-       y, mientras no haya ninguno, abren WhatsApp con el mensaje escrito.
+       Guardan en la base configurada en script.js (CONFIG.baseDeDatos) y,
+       una vez guardado, ofrecen avisar también por WhatsApp. Sin base
+       configurada, van directo a WhatsApp.
        ============================================================ -->
 
   <!-- Confirmación de asistencia -->
@@ -748,7 +749,7 @@
           <input class="campo__entrada" type="number" name="alcohol" min="0" max="20" placeholder="Ej.: 2" inputmode="numeric">
         </label>
 
-        <label class="campo">
+        <label class="campo" data-campo-nota>
           <span class="campo__etiqueta">¿Algo que tengamos que saber? <em>(opcional)</em></span>
           <input class="campo__entrada" type="text" name="nota" placeholder="Ej.: soy celíaco / vegetariano">
         </label>
@@ -760,6 +761,20 @@
 
         <p class="modal__estado" role="status" aria-live="polite"></p>
       </form>
+
+      <div class="modal__hecho" id="hechoConfirmar" hidden>
+        <svg class="modal__hecho-tilde" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1.3" opacity="0.45"/>
+          <path d="M15 24.5l6.5 6.5L33 18.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p class="modal__hecho-titulo">¡Gracias! Ya guardamos tu respuesta</p>
+        <p class="modal__hecho-texto">Si querés, mandanos también un WhatsApp: así nos llega al teléfono y lo tenemos por duplicado.</p>
+        <a class="boton boton--vino modal__hecho-boton" data-whatsapp target="_blank" rel="noopener" data-cursor="hover">
+          <span class="boton__texto">Avisar por WhatsApp</span>
+          <span class="boton__brillo" aria-hidden="true"></span>
+        </a>
+        <button class="modal__hecho-listo" type="button" data-cerrar data-cursor="hover">Listo, cerrar</button>
+      </div>
     </div>
   </div>
 
@@ -804,6 +819,20 @@
 
         <p class="modal__estado" role="status" aria-live="polite"></p>
       </form>
+
+      <div class="modal__hecho" id="hechoCancion" hidden>
+        <svg class="modal__hecho-tilde" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="1.3" opacity="0.45"/>
+          <path d="M15 24.5l6.5 6.5L33 18.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p class="modal__hecho-titulo">¡Anotada! Gracias por la sugerencia</p>
+        <p class="modal__hecho-texto">Si querés, mandanos también un WhatsApp con la canción.</p>
+        <a class="boton boton--vino modal__hecho-boton" data-whatsapp target="_blank" rel="noopener" data-cursor="hover">
+          <span class="boton__texto">Avisar por WhatsApp</span>
+          <span class="boton__brillo" aria-hidden="true"></span>
+        </a>
+        <button class="modal__hecho-listo" type="button" data-cerrar data-cursor="hover">Listo, cerrar</button>
+      </div>
     </div>
   </div>
 

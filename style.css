@@ -1284,6 +1284,9 @@ body[data-estado="abierta"] .hero__scroll.hero__scroll--oculto { opacity: 0; }
 }
 
 .modal__form { width: 100%; display: grid; gap: 1.1rem; justify-items: stretch; }
+/* El «display: grid» de arriba le gana al hidden del navegador, y al
+   guardar la respuesta el formulario tiene que desaparecer de verdad. */
+.modal__form[hidden] { display: none; }
 
 /* Sí / No */
 .modal__opciones { display: flex; gap: 0.7rem; justify-content: center; flex-wrap: wrap; }
@@ -1304,6 +1307,37 @@ body[data-estado="abierta"] .hero__scroll.hero__scroll--oculto { opacity: 0; }
 .opcion input:focus-visible + .opcion__pastilla { outline: 2px solid var(--dorado); outline-offset: 2px; }
 
 /* Campos */
+/* Pantalla de «listo»: reemplaza al formulario una vez guardada la
+   respuesta y ofrece el segundo aviso, el de WhatsApp. */
+.modal__hecho {
+  display: grid; justify-items: center; gap: 0.6rem;
+  text-align: center;
+  padding-top: 0.4rem;
+}
+.modal__hecho[hidden] { display: none; }
+.modal__hecho-tilde { width: 54px; height: 54px; color: var(--bordo); margin-bottom: 0.2rem; }
+.modal__hecho-titulo {
+  font-family: var(--f-cursiva); font-style: italic;
+  font-size: clamp(1.15rem, 3.4vw, 1.4rem);
+  color: var(--bordo);
+}
+.modal__hecho-texto {
+  font-family: var(--f-titulos); font-weight: 500;
+  font-size: 0.98rem; line-height: 1.7;
+  color: var(--tinta-suave);
+  max-width: 34ch;
+}
+.modal__hecho-boton { margin-top: 0.5rem; }
+.modal__hecho-listo {
+  margin-top: 0.2rem;
+  background: none; border: 0; cursor: pointer;
+  font-family: var(--f-botones); font-size: 0.72rem; font-weight: 500;
+  letter-spacing: 0.18em; text-indent: 0.18em; text-transform: uppercase;
+  color: var(--tinta-tenue);
+  padding: 0.6rem 0.8rem;
+}
+.modal__hecho-listo:hover { color: var(--bordo); }
+
 .campo { display: grid; gap: 0.35rem; text-align: left; }
 .campo[hidden] { display: none; }
 .campo__etiqueta {
