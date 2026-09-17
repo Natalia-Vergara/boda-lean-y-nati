@@ -680,7 +680,7 @@ function conectarFormulario(form, tabla, armarMensaje) {
     } catch (error) {
       console.error('No se pudo guardar:', error);
       // Si la base falla, el invitado no se queda sin poder avisar
-      estado.innerHTML = 'No pudimos guardarlo. ' +
+      estado.innerHTML = 'No pudimos guardar tu respuesta en este momento. ' +
         `<a href="https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(armarMensaje(datos))}" ` +
         'target="_blank" rel="noopener">Envialo por WhatsApp</a>.';
     } finally {

@@ -1,0 +1,36 @@
+# El plan gratuito de Supabase suspende el proyecto cuando pasa una semana
+# sin recibir consultas. Esta tarea le hace un pedido mínimo cada tres días
+# para que la base siga despierta mientras los invitados confirman.
+#
+# La clave es la anónima (la misma que ya viaja en script.js, pública por
+# diseño) y el pedido es de sólo lectura: las políticas de la base no
+# permiten leer nada, así que la respuesta vuelve vacía. Alcanza para que
+# el proyecto cuente como activo.
+
+name: Mantener la base despierta
+
+on:
+  schedule:
+    - cron: '0 12 */3 * *'   # cada 3 días, 12:00 UTC (9:00 en Argentina)
+  workflow_dispatch:          # y también a mano, desde la pestaña Actions
+
+jobs:
+  despertar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar la base
+        run: |
+          URL="https://mjvhfvcpkrzpufrpklrv.supabase.co/rest/v1/confirmaciones?select=id&limit=1"
+          CLAVE="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdmhmdmNwa3J6cHVmcnBrbHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MTc4NjksImV4cCI6MjEwNDQ5Mzg2OX0.r9gSC7MoNaAxQQo3oQtZmZXkMyOlYDJe6G1rphYhb50"
+
+          codigo=$(curl -s -o /tmp/respuesta -w '%{http_code}' \
+            -H "apikey: $CLAVE" -H "Authorization: Bearer $CLAVE" "$URL")
+
+          echo "Respuesta HTTP: $codigo"
+          cat /tmp/respuesta
+
+          if [ "$codigo" != "200" ]; then
+            echo "::error::La base no respondió como se esperaba (HTTP $codigo). Puede estar pausada: entrar a supabase.com y tocar «Resume project»."
+            exit 1
+          fi
+          echo "La base está despierta."

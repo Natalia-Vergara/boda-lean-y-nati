@@ -147,6 +147,28 @@ create policy "cualquiera puede sugerir"
   on canciones for insert to anon with check (true);
 ```
 
+### El proyecto se pausa solo (plan gratuito)
+
+Supabase **suspende los proyectos del plan gratuito que pasan 7 días sin
+recibir ninguna consulta**. No se pierde nada —los datos y los backups
+quedan intactos— pero mientras está pausado la base no responde, así que
+los formularios caen en el respaldo de WhatsApp.
+
+Para reactivarlo: supabase.com → el proyecto → **Resume project**.
+
+Para que no vuelva a pasar, el repositorio incluye la tarea
+[`.github/workflows/mantener-base-despierta.yml`](.github/workflows/mantener-base-despierta.yml),
+que cada 3 días le hace a la base un pedido mínimo de sólo lectura. Se
+puede disparar a mano desde la pestaña **Actions** del repositorio. Dos
+advertencias:
+
+- GitHub **desactiva las tareas programadas** de los repositorios sin
+  actividad durante 60 días; si el repositorio queda quieto mucho tiempo,
+  conviene revisar la pestaña *Actions*.
+- Si se acerca la fecha y hace falta garantía total, el plan Pro de
+  Supabase no pausa nunca y se cobra por mes: se puede contratar sólo
+  durante las semanas en que los invitados confirman y bajarlo después.
+
 Sin políticas de lectura, nadie puede consultar ni borrar las respuestas
 desde el sitio. Las confirmaciones se ven desde el panel de Supabase, que
 usa credenciales propias y permite exportar a CSV.
