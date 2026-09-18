@@ -51,11 +51,6 @@ const CONFIG = {
 
   // Clave usada para recordar el estado de la música entre visitas
   claveMusica: 'nyl-musica',
-
-  // Clave donde se recuerda qué sobre ya vio esta persona. La ceremonia de
-  // apertura dura 7 s: está buena la primera vez y estorba de la segunda en
-  // adelante, cuando entran sólo a mirar la dirección o el horario.
-  claveSobre: 'nyl-sobre-visto',
 };
 
 /* ————— 02. UTILIDADES ————— */
@@ -99,23 +94,17 @@ document.addEventListener('DOMContentLoaded', () => {
     iniciarAlbum();
     iniciarCopiarAlias();
     iniciarCompartir();
-    iniciarVerSobre();
-    if (sobreYaVisto()) {
-      entrarDirecto($('#escenaSobre'));
-    } else {
-      $('#btnAbrir').addEventListener('click', () => {
-        reproducirMusica();
-        recordarSobre();
-        const escena = $('#escenaSobre');
-        escena.classList.add('escena--abierta');
-        setTimeout(() => {
-          escena.classList.add('escena--fuera');
-          document.body.dataset.estado = 'abierta';
-          invitacionAbierta = true;
-          actualizarBotonMusica();
-        }, 7000);
-      });
-    }
+    $('#btnAbrir').addEventListener('click', () => {
+      reproducirMusica();
+      const escena = $('#escenaSobre');
+      escena.classList.add('escena--abierta');
+      setTimeout(() => {
+        escena.classList.add('escena--fuera');
+        document.body.dataset.estado = 'abierta';
+        invitacionAbierta = true;
+        actualizarBotonMusica();
+      }, 4500);
+    });
     return;
   }
 
@@ -137,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
   iniciarBotonArriba();
   iniciarAtajoConfirmar();
   iniciarCompartir();
-  iniciarVerSobre();
 });
 
 /* ————— 03. PRELOADER ————— */
@@ -314,53 +302,12 @@ function iniciarParallax() {
   });
 }
 
-/* ————— 08b. MEMORIA DEL SOBRE ————— */
-/* Se guarda el código del invitado además del hecho de haberlo abierto: si a
-   la misma persona le pasan otro link personalizado, el sobre vuelve a
-   mostrarse con el nombre nuevo, que es la gracia. */
-function codigoActual() {
-  return new URLSearchParams(location.search).get('i') || 'general';
-}
-
-function sobreYaVisto() {
-  try { return localStorage.getItem(CONFIG.claveSobre) === codigoActual(); }
-  catch (e) { return false; }
-}
-
-function recordarSobre() {
-  try { localStorage.setItem(CONFIG.claveSobre, codigoActual()); }
-  catch (e) { /* navegación privada: se verá el sobre siempre */ }
-}
-
-function olvidarSobre() {
-  try { localStorage.removeItem(CONFIG.claveSobre); } catch (e) { /* nada */ }
-}
-
-/** Deja la invitación abierta sin reproducir la apertura del sobre */
-function entrarDirecto(escena) {
-  escena.remove();
-  document.body.dataset.estado = 'abierta';
-  invitacionAbierta = true;
-  actualizarBotonMusica();
-}
-
 function iniciarSobre() {
   const escena = $('#escenaSobre');
-
-  // Segunda visita: adentro directamente, sin los 7 s de ceremonia
-  if (sobreYaVisto()) {
-    entrarDirecto(escena);
-    if (lenis) lenis.resize();
-    ScrollTrigger.refresh();
-    reproducirEntradaHero();
-    return;
-  }
-
 
   $('#btnAbrir').addEventListener('click', () => {
     // 1. Empieza la música (gesto del usuario: el navegador lo permite)
     reproducirMusica();
-    recordarSobre();
 
     // 2. La solapa se abre y la carta asoma (animaciones en CSS)
     escena.classList.add('escena--abierta');
@@ -376,7 +323,7 @@ function iniciarSobre() {
       if (lenis) lenis.resize();
       ScrollTrigger.refresh();
       reproducirEntradaHero();
-    }, 7000);
+    }, 4500);
   });
 }
 
@@ -391,18 +338,20 @@ function reproducirEntradaHero() {
 
   const letras = dividirEnPalabras($('#heroNombres'));
 
+  /* Los tiempos están ajustados para que, sumados a los 4,5 s del sobre, la
+     portada quede completa a los 7 s desde que se toca el sello. */
   gsap.timeline({ defaults: { ease: 'power3.out' } })
-    .to('#heroIniciales', { opacity: 1, y: 0, duration: 1.8, ease: 'power2.out' })
-    .set('#heroNombres', { opacity: 1 }, '-=0.7')
+    .to('#heroIniciales', { opacity: 1, y: 0, duration: 1, ease: 'power2.out' })
+    .set('#heroNombres', { opacity: 1 }, '-=0.4')
     .from(letras, {
       yPercent: 45,
       opacity: 0,
-      duration: 1.6,
-      stagger: 0.12,
+      duration: 0.9,
+      stagger: 0.08,
       ease: 'power3.out',
     }, '<')
-    .to('#heroPromesa', { opacity: 1, y: 0, duration: 1.8 }, '-=0.8')
-    .to('#heroFecha', { opacity: 1, y: 0, duration: 1.4 }, '-=1');
+    .to('#heroPromesa', { opacity: 1, y: 0, duration: 1 }, '-=0.45')
+    .to('#heroFecha', { opacity: 1, y: 0, duration: 0.85 }, '-=0.55');
 }
 
 /* ————— 09. ANIMACIONES DE SCROLL ————— */
@@ -912,16 +861,6 @@ function iniciarCompartir() {
     clearTimeout(temporizador);
     temporizador = setTimeout(() => { aviso.textContent = ''; }, 2600);
   }
-}
-
-/* ————— 13d. VOLVER A VER EL SOBRE ————— */
-function iniciarVerSobre() {
-  const boton = $('#btnVerSobre');
-  if (!boton) return;
-  boton.addEventListener('click', () => {
-    olvidarSobre();
-    location.reload();
-  });
 }
 
 function iniciarBotonArriba() {
