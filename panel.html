@@ -182,6 +182,9 @@
       margin-top: 0.35rem;
     }
     .cifra__detalle { font-size: 0.8rem; color: var(--tinta-tenue); margin-top: 0.2rem; }
+    /* Cuando el espacio de fotos se acerca al tope, la ficha lo dice sola */
+    .cifra--alerta { border-color: var(--alerta); }
+    .cifra--alerta .cifra__valor, .cifra--alerta .cifra__detalle { color: var(--alerta); }
 
     /* ————— Bloques ————— */
     .bloque { margin-bottom: 2.4rem; }
@@ -332,9 +335,13 @@
 
   const $ = (sel, raiz = document) => raiz.querySelector(sel);
 
+  const BALDE = 'fotos-invitados';
+  const TOPE_GB = 1;        // lo que da el plan gratuito de Supabase
+
   let sesion = null;        // { access_token, refresh_token, vence }
   let confirmaciones = [];
   let canciones = [];
+  let fotos = null;         // { cantidad, bytes } o null si todavía no hay balde
 
   /* ————— Sesión ————— */
   function guardarSesion(datos) {
@@ -434,6 +441,34 @@
     return respuesta.json();
   }
 
+  /** Cuántas fotos subieron los invitados y cuánto ocupan */
+  async function medirFotos() {
+    const token = await permiso();
+    let cantidad = 0, bytes = 0, pagina = 0;
+
+    // Se pide de a 1000; con más de 5000 fotos el número queda corto, pero
+    // para entonces el espacio ya habría avisado de sobra.
+    while (pagina < 5) {
+      const respuesta = await fetch(`${BASE.url}/storage/v1/object/list/${BALDE}`, {
+        method: 'POST',
+        headers: {
+          apikey: BASE.clave,
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prefix: '', limit: 1000, offset: pagina * 1000 }),
+      });
+      if (!respuesta.ok) throw new Error(`fotos: ${respuesta.status}`);
+      const lote = await respuesta.json();
+      if (!Array.isArray(lote) || !lote.length) break;
+      cantidad += lote.length;
+      bytes += lote.reduce((t, f) => t + ((f.metadata && f.metadata.size) || 0), 0);
+      if (lote.length < 1000) break;
+      pagina++;
+    }
+    return { cantidad, bytes };
+  }
+
   async function borrar(tabla, id) {
     const token = await permiso();
     const respuesta = await fetch(`${BASE.url}/rest/v1/${tabla}?id=eq.${id}`, {
@@ -469,8 +504,19 @@
       { valor: confirmaciones.length, nombre: 'Respuestas en total', tenue: true },
     ];
 
+    if (fotos) {
+      const usado = fotos.bytes / 1073741824;
+      const porciento = Math.round((usado / TOPE_GB) * 100);
+      celdas.push({
+        valor: fotos.cantidad,
+        nombre: 'Fotos de los invitados',
+        detalle: `${usado.toFixed(2)} GB de ${TOPE_GB} · ${porciento}% del espacio`,
+        alerta: porciento >= 80,
+      });
+    }
+
     $('#cifras').innerHTML = celdas.map((c) => `
-      <div class="cifra${c.tenue ? ' cifra--tenue' : ''}">
+      <div class="cifra${c.tenue ? ' cifra--tenue' : ''}${c.alerta ? ' cifra--alerta' : ''}">
         <p class="cifra__valor">${c.valor}</p>
         <p class="cifra__nombre">${escapar(c.nombre)}</p>
         ${c.detalle ? `<p class="cifra__detalle">${escapar(c.detalle)}</p>` : ''}
@@ -570,6 +616,8 @@
     $('#botonRecargar').disabled = true;
     try {
       [confirmaciones, canciones] = await Promise.all([leer('confirmaciones'), leer('canciones')]);
+      // El balde de fotos puede no existir todavía: si falla, se omite la cifra
+      fotos = await medirFotos().catch(() => null);
       pintarCifras();
       pintarConfirmaciones();
       pintarCanciones();

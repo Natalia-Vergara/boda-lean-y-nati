@@ -31,7 +31,7 @@ sin código ve la invitación genérica («Estás cordialmente invitado»).
 4. **Dress code** — Formal, con los 5 colores a evitar (blanco, crema, beige, nude y bordo).
 5. **Regalos** — datos de la cuenta (Naranja X) con botones para copiar el alias y el CBU (Clipboard API + fallback) y aviso de confirmación.
 6. **Celebración sólo para adultos**.
-7. **Fotos** — link al álbum compartido del evento.
+7. **Tus fotos** — botón a [`fotos.html`](fotos.html), donde los invitados suben lo que sacaron sin crear ninguna cuenta. Cuando exista el álbum terminado (`CONFIG.urlAlbum`), se suma debajo un link para verlo.
 8. **Preguntas frecuentes** — ocho respuestas plegables: chicos, estacionamiento, horario, dress code, lluvia, pulsera de barra libre, menú especial y fecha límite.
 9. **Confirmación de asistencia** — antes del **25 de octubre**. El botón «Confirmar aquí» abre una ventana con el formulario; al elegir «No puedo» quedan sólo el nombre y el botón de enviar. Una vez guardada la respuesta en la base, se ofrece **avisar también por WhatsApp**, para tenerla por duplicado.
 10. **Hashtag y compartir** — `#BodaLeanyNati` y un botón que usa el menú de compartir del teléfono (y copia el link donde no existe). Comparte siempre la invitación **general**: reenviar un link personalizado le daría a otra familia los lugares de quien lo recibió.
@@ -45,6 +45,7 @@ Además, un **atajo fijo «Confirmar asistencia»** abajo a la izquierda: aparec
 boda/
 │  index.html            → Estructura de la invitación (SEO, OpenGraph, Schema.org)
 │  panel.html            → Panel privado de confirmaciones (entra con usuario y clave)
+│  fotos.html            → Página donde los invitados suben sus fotos (QR de las mesas)
 │  style.css             → Sistema de diseño completo (paleta, tipografías, secciones)
 │  script.js             → Animaciones GSAP, Lenis, cuenta regresiva, copiar alias
 │  manifest.webmanifest  → Manifest PWA
@@ -212,6 +213,78 @@ create policy "los novios leen las canciones"
   on canciones for select to authenticated
   using ( (auth.jwt() ->> 'email') in ('TU-MAIL@ejemplo.com') );
 ```
+
+## Fotos de los invitados
+
+[`fotos.html`](fotos.html) es la página donde los invitados suben las fotos que
+sacaron. Se abre desde el **QR de las mesas** y desde la sección *Tus fotos* de
+la invitación. Es una página aparte —sin sobre, sin música, sin animaciones—
+porque tiene que abrir rápido con mala señal.
+
+**No hace falta ninguna cuenta.** El invitado toca, elige y listo.
+
+### Por qué achica las fotos
+
+El plan gratuito de Supabase da **1 GB** de espacio. Una foto de celular pesa
+3-5 MB tal cual sale: subidas así entrarían 250 y se llenaría con veinte
+invitados. La página redimensiona cada foto en el celular a **2000 px de lado
+largo, calidad 0,82** antes de subirla (`CONFIG.ladoMaximo` y `CONFIG.calidad`),
+con lo que cada una queda en torno a los 500 KB y entran unas **2.000**.
+
+Achicar no es sólo por el espacio: con la señal de Los Talas, subir 4 MB puede
+tardar medio minuto por foto. Comprimida tarda segundos. **Es lo que hace que
+funcione la noche del casamiento.**
+
+Los **videos no van acá** — uno solo ocupa lo que doscientas fotos. La página
+los deriva a la carpeta de Drive que se configure en `CONFIG.carpetaDrive`;
+mientras esté vacía, ese bloque no se muestra.
+
+El panel muestra cuántas fotos hay y cuánto espacio queda, y avisa en rojo al
+llegar al 80 %.
+
+### Cómo habilitarlo
+
+**1. Crear el balde.** En Supabase → *Storage* → **New bucket**:
+
+- Nombre: `fotos-invitados`
+- **Public bucket: NO** (así nadie puede mirar las fotos de los demás)
+- *Additional configuration* → **Restrict file upload size**: 50 MB
+- *Allowed MIME types*: `image/*`
+
+**2. Los permisos.** En el *SQL Editor*, cambiando el correo por el real:
+
+```sql
+-- Cualquiera puede subir; nadie puede mirar ni borrar lo de los demás.
+drop policy if exists "los invitados suben fotos" on storage.objects;
+create policy "los invitados suben fotos"
+  on storage.objects for insert to anon
+  with check ( bucket_id = 'fotos-invitados' );
+
+-- Sólo los novios ven y borran.
+drop policy if exists "los novios ven las fotos"   on storage.objects;
+drop policy if exists "los novios borran las fotos" on storage.objects;
+
+create policy "los novios ven las fotos"
+  on storage.objects for select to authenticated
+  using ( bucket_id = 'fotos-invitados'
+          and (auth.jwt() ->> 'email') in ('TU-MAIL@ejemplo.com') );
+
+create policy "los novios borran las fotos"
+  on storage.objects for delete to authenticated
+  using ( bucket_id = 'fotos-invitados'
+          and (auth.jwt() ->> 'email') in ('TU-MAIL@ejemplo.com') );
+```
+
+**3. La carpeta de Drive** (para los videos): crearla, compartirla como
+*Cualquiera con el enlace · Editor* y pegar el link en `CONFIG.carpetaDrive`
+dentro de `fotos.html`. Ojo: para subir a Drive hace falta cuenta de Google —
+por eso es la vía secundaria y no la principal.
+
+### Si el espacio se llena
+
+Al invitado no le aparece un error seco: le queda el link de Drive a mano. Las
+salidas son dos: derivar todo a Drive, o contratar el plan **Pro** de Supabase
+(US$ 25 por mes, 100 GB) sólo durante noviembre y darlo de baja después.
 
 ### El proyecto se pausa solo (plan gratuito)
 

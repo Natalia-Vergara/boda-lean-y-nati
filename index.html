@@ -658,16 +658,23 @@
           <circle class="trazo" cx="38" cy="20" r="1.6" stroke="currentColor" stroke-width="1.1"/>
         </svg>
 
-        <h2 class="titulo" data-anim="split">Fotos</h2>
-        <p class="parrafo" data-anim="fade-up">
-          Comparte con nosotros tus fotografías y videos del evento
+        <p class="etiqueta" data-anim="fade-up">Después de la fiesta</p>
+        <h2 class="titulo" data-anim="split">Tus fotos</h2>
+        <p class="parrafo" data-anim="fade-up" data-anim-delay="0.1">
+          Las mejores fotos de la noche las van a tener ustedes. Subilas acá
+          cuando llegues a casa: no hace falta crear ninguna cuenta.
         </p>
 
-        <!-- El link del álbum se configura en script.js → CONFIG.urlAlbum -->
-        <a class="boton boton--vino album__boton" id="btnAlbum" href="#" target="_blank" rel="noopener" data-anim="zoom" data-anim-delay="0.2" data-cursor="hover">
-          <span class="boton__texto">Ir al álbum</span>
+        <a class="boton boton--vino album__boton" href="fotos.html" data-anim="zoom" data-anim-delay="0.2" data-cursor="hover">
+          <span class="boton__texto">Subir mis fotos</span>
           <span class="boton__brillo" aria-hidden="true"></span>
         </a>
+
+        <!-- El álbum terminado se configura en script.js → CONFIG.urlAlbum.
+             Mientras no exista, este botón no se muestra. -->
+        <p class="album__terminado" id="bloqueAlbum" hidden>
+          <a class="album__link" id="btnAlbum" href="#" target="_blank" rel="noopener" data-cursor="hover">Ver el álbum de todos</a>
+        </p>
       </div>
     </section>
 

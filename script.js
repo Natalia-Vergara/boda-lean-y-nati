@@ -731,13 +731,11 @@ function reiniciarVentana(ventana) {
 
 /* ————— 11. ÁLBUM COMPARTIDO ————— */
 function iniciarAlbum() {
-  // Mientras el álbum no esté creado, la sección entera se oculta:
-  // es preferible a mostrar un botón que lleva a un link roto.
-  if (!CONFIG.urlAlbum || CONFIG.urlAlbum.includes('CAMBIAR-POR')) {
-    $('#fotos').remove();
-    return;
-  }
+  // La sección ahora vive por el botón de subir fotos, que anda siempre.
+  // El link al álbum terminado se suma recién cuando existe.
+  if (!CONFIG.urlAlbum || CONFIG.urlAlbum.includes('CAMBIAR-POR')) return;
   $('#btnAlbum').href = CONFIG.urlAlbum;
+  $('#bloqueAlbum').hidden = false;
 }
 
 /* ————— 12. COPIAR DATOS DE LA CUENTA ————— */
