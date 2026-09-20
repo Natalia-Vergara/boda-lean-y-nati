@@ -1498,6 +1498,15 @@ body[data-estado="abierta"] .hero__scroll.hero__scroll--oculto { opacity: 0; }
   outline: none;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
+/* Aviso bajo un campo: aparece sólo cuando hay algo que decir */
+.campo__aviso {
+  font-family: var(--f-titulos); font-weight: 500;
+  font-size: 0.88rem; line-height: 1.5;
+  color: var(--bordo);
+  margin-top: 0.15rem;
+}
+.campo__aviso:empty { display: none; }
+
 .campo__entrada::placeholder { color: rgba(61, 46, 42, 0.4); font-size: 0.95rem; }
 .campo__entrada:focus {
   border-color: var(--dorado);

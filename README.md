@@ -34,6 +34,7 @@ sin código ve la invitación genérica («Estás cordialmente invitado»).
 7. **Tus fotos** — botón a [`fotos.html`](fotos.html), donde los invitados suben lo que sacaron sin crear ninguna cuenta. Cuando exista el álbum terminado (`CONFIG.urlAlbum`), se suma debajo un link para verlo.
 8. **Preguntas frecuentes** — ocho respuestas plegables: chicos, estacionamiento, horario, dress code, lluvia, pulsera de barra libre, menú especial y fecha límite.
 9. **Confirmación de asistencia** — antes del **25 de octubre**. El botón «Confirmar aquí» abre una ventana con el formulario; al elegir «No puedo» quedan sólo el nombre y el botón de enviar. Una vez guardada la respuesta en la base, se ofrece **avisar también por WhatsApp**, para tenerla por duplicado.
+   Quien entra por su link personalizado **no puede confirmar más personas que los lugares que tiene**: el campo se limita a `pases` y, si escribe de más, lo corrige y explica por qué, invitando a escribirles si necesita un lugar extra. Sin link personalizado no hay tope (máximo 20), porque no hay contra qué compararlo.
 10. **Hashtag y compartir** — `#BodaLeanyNati` y un botón que usa el menú de compartir del teléfono (y copia el link donde no existe). Comparte siempre la invitación **general**: reenviar un link personalizado le daría a otra familia los lugares de quien lo recibió.
 11. **Cierre** — despedida con las iniciales.
 

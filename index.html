@@ -922,8 +922,9 @@
         </label>
 
         <label class="campo">
-          <span class="campo__etiqueta">¿Cuántas personas asisten?</span>
+          <span class="campo__etiqueta">¿Cuántas personas asisten? <em id="topePersonas"></em></span>
           <input class="campo__entrada" type="number" name="personas" min="1" max="20" value="1" inputmode="numeric">
+          <span class="campo__aviso" id="avisoPersonas" role="status" aria-live="polite"></span>
         </label>
 
         <label class="campo" data-campo-barra>

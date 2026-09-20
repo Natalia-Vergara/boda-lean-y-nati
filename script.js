@@ -552,9 +552,39 @@ function iniciarCampoBarra() {
   const campoPersonas = personas && personas.closest('.campo');
   const campoNota = $('[data-campo-nota]', form);
   const nota = $('input[name="nota"]', form);
+  const avisoPersonas = $('#avisoPersonas', form);
+  const etiquetaTope = $('#topePersonas', form);
   if (!campo || !alcohol) return;
 
+  // Con link personalizado, la invitación vale por una cantidad concreta de
+  // lugares. Sin tope, alguien de dos puede escribir cuatro sin darse cuenta
+  // y el número que se le pasa a la finca deja de cerrar.
+  const invitado = window.__invitado;
+  const tope = invitado ? (Number(invitado.pases) || 0) : 0;
+
+  if (tope > 0 && personas) {
+    personas.max = String(tope);
+    if (etiquetaTope) {
+      etiquetaTope.textContent = tope === 1
+        ? '(tenés 1 lugar)'
+        : `(tenés ${tope} lugares)`;
+    }
+  }
+
   const limitar = () => {
+    if (tope > 0 && personas) {
+      if (Number(personas.value) > tope) {
+        personas.value = String(tope);
+        if (avisoPersonas) {
+          avisoPersonas.textContent = tope === 1
+            ? 'Tu invitación es para una persona. Si necesitás un lugar más, escribinos y lo vemos.'
+            : `Tu invitación es para ${tope} personas. Si necesitás un lugar más, escribinos y lo vemos.`;
+        }
+      } else if (avisoPersonas) {
+        avisoPersonas.textContent = '';
+      }
+    }
+
     const total = Number(personas && personas.value) || 1;
     alcohol.max = String(total);
     if (Number(alcohol.value) > total) alcohol.value = String(total);
@@ -572,6 +602,7 @@ function iniciarCampoBarra() {
     if (campoPersonas) campoPersonas.hidden = !viene;
     if (campoNota) campoNota.hidden = !viene;
     if (nota && !viene) nota.value = '';
+    if (!viene && avisoPersonas) avisoPersonas.textContent = '';
   };
 
   $$('input[name="asiste"]', form).forEach((r) => r.addEventListener('change', alternar));
