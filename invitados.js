@@ -72,4 +72,6 @@ window.INVITADOS = {
   'wilfredo-y-claudia':       { nombre: 'Wilfredo y Claudia',          pases: 2 },
   'wilder-y-madre':           { nombre: 'Wilder y Madre',              pases: 2 },
   'doris':                    { nombre: 'Doris',                       pases: 1 },
+  'renzo-y-esposa':           { nombre: 'Renzo y esposa',              pases: 2 },
+  'javier-villacorta':        { nombre: 'Javier Villacorta',           pases: 1 },
 };
