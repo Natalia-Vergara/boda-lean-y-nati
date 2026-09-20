@@ -74,4 +74,5 @@ window.INVITADOS = {
   'doris':                    { nombre: 'Doris',                       pases: 1 },
   'renzo-y-esposa':           { nombre: 'Renzo y esposa',              pases: 2 },
   'javier-villacorta':        { nombre: 'Javier Villacorta',           pases: 1 },
+  'erick-y-esposa':           { nombre: 'Erick y esposa',              pases: 2 },
 };
