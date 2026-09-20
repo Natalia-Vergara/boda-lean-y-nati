@@ -40,10 +40,10 @@ window.INVITADOS = {
   'eve-y-nahu':        { nombre: 'Eve y Nahu',          pases: 2 },
   'diego-y-daniel':    { nombre: 'Diego y Daniel',      pases: 2 },
   'mari-y-pablo':      { nombre: 'Mari y Pablo',        pases: 2 },
-  'andres-y-belen':    { nombre: 'Andres y Belen',      pases: 2 },
+  'andres-y-belen':    { nombre: 'Andrés y Belén',      pases: 2 },
   'isa-vergara':       { nombre: 'Isa Vergara',         pases: 1 },
   'cris-mantilla':     { nombre: 'Cris Mantilla',       pases: 1 },
   'carina-y-kelly':    { nombre: 'Carina y Kelly',      pases: 2 },
-  'juan-rodriguez':    { nombre: 'Juan Rodriguez',      pases: 1 },
+  'juan-rodriguez':    { nombre: 'Juan Rodríguez',      pases: 1 },
   'santos-y-olinda':   { nombre: 'Santos y Olinda',     pases: 2 },
 };
