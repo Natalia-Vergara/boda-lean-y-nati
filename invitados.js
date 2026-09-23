@@ -45,7 +45,7 @@ window.INVITADOS = {
   'cris-mantilla':            { nombre: 'Cris Mantilla',               pases: 1 },
   'carina-y-kelly':           { nombre: 'Carina y Kelly',              pases: 2 },
   'juan-rodriguez':           { nombre: 'Juan Rodríguez',              pases: 1 },
-  'santos-y-olinda':          { nombre: 'Santos y Olinda',             pases: 2 },
+  'santos-y-olinda':          { nombre: 'Felix y Olinda',              pases: 2 },
   'caro':                     { nombre: 'Caro',                        pases: 1 },
   'vale-celerier':            { nombre: 'Vale Celerier',               pases: 1 },
   'moni':                     { nombre: 'Moni',                        pases: 1 },
