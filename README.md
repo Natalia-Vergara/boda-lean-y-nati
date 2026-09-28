@@ -281,6 +281,35 @@ create policy "los novios borran las fotos"
 dentro de `fotos.html`. Ojo: para subir a Drive hace falta cuenta de Google —
 por eso es la vía secundaria y no la principal.
 
+### Los carteles de las mesas
+
+[`carteles.html`](carteles.html) es una hoja A4 lista para imprimir con
+**cuatro carteles A6 iguales**, cada uno con el código QR. Se abre en la
+computadora, se toca «Imprimir» y se corta por las dos líneas punteadas del
+medio; los bordes de la hoja no se cortan.
+
+Van **sin fondo de color** a propósito: en una impresora hogareña un fondo
+lleno sale manchado y gasta muchísima tinta. El color lo pone el papel.
+
+El QR está dibujado dentro del HTML —no es una imagen ni depende de
+internet— y apunta a **`/fotos/`**, no a `fotos.html`. Esa diferencia
+importa: el papel repartido en las mesas ya no se puede cambiar, así que el
+QR apunta a una dirección corta que redirige
+([`fotos/index.html`](fotos/index.html)). Si algún día la página de fotos se
+muda de lugar, se cambia esa redirección y los carteles impresos siguen
+funcionando.
+
+Probado: el código se lee de cerca, a un brazo de distancia y desde el otro
+lado de la mesa, con poca luz y con la foto movida. El bordó sobre papel da
+12:1 de contraste, muy por encima del 3:1 que necesitan los lectores.
+
+Si alguna vez hiciera falta redibujar el código para otra dirección:
+
+```sh
+pip install segno
+python3 assets/herramientas/qr-carteles.py https://…/otra-direccion/
+```
+
 ### Si el espacio se llena
 
 Al invitado no le aparece un error seco: le queda el link de Drive a mano. Las

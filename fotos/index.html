@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Subí tus fotos · Lean &amp; Nati</title>
+  <!-- ============================================================
+       DIRECCIÓN CORTA — esto es lo que apunta el QR de las mesas
+       ------------------------------------------------------------
+       El QR está impreso en papel: una vez repartido en las mesas ya
+       no se puede cambiar. Por eso no apunta directo a fotos.html
+       sino acá, que es una dirección que sí podemos redirigir si
+       algún día la página de fotos se muda de lugar.
+       ============================================================ -->
+  <meta http-equiv="refresh" content="0; url=../fotos.html">
+  <link rel="canonical" href="../fotos.html">
+  <meta name="robots" content="noindex">
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 3rem 1.5rem;
+           text-align: center; color: #3D2E2A; background: #FBF8F2; }
+    a { color: #61152A; }
+  </style>
+</head>
+<body>
+  <p>Abriendo la página para subir tus fotos…</p>
+  <p><a href="../fotos.html">Si no abre sola, tocá acá.</a></p>
+  <script>location.replace('../fotos.html');</script>
+</body>
+</html>

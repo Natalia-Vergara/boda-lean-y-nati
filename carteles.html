@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carteles para las mesas · Lean &amp; Nati</title>
+  <meta name="description" content="Hoja imprimible con el código QR para que los invitados suban sus fotos.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <style>
+    /* ============================================================
+       CARTELES DE MESA — hoja A4 con cuatro tarjetas A6
+       ------------------------------------------------------------
+       Se abre en la computadora, se toca «Imprimir» y sale una hoja
+       con cuatro carteles iguales. Se corta por las dos líneas
+       punteadas del medio: no hay que recortar los bordes, cada
+       tarjeta es exactamente un cuarto de la hoja.
+
+       Las tarjetas se imprimen SIN fondo de color, a propósito: en
+       una impresora hogareña un fondo crema sale manchado y gasta
+       muchísima tinta. El color lo pone el papel.
+
+       El QR está dibujado acá adentro (no es una imagen ni depende
+       de internet) y apunta a /fotos/, que es una dirección corta
+       que redirige a fotos.html. Eso importa porque el papel ya no
+       se puede cambiar: si la página de fotos alguna vez se muda,
+       se cambia la redirección y los carteles impresos siguen
+       funcionando.
+       ============================================================ */
+    :root {
+      --papel:      #FBF8F2;
+      --tinta:      #3D2E2A;
+      --tinta-suave:#6B5750;
+      --tinta-tenue:#8C7970;
+      --bordo:      #61152A;
+      --dorado:     #A98B54;
+      --linea:      #E4D9C6;
+      --escritorio: #E7E1D7;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0;
+      background: var(--escritorio);
+      color: var(--tinta);
+      font-family: 'Poppins', system-ui, sans-serif;
+      font-weight: 300;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ——————————————————— Lo que se ve en pantalla ——————————————————— */
+    .guia {
+      max-width: 44rem;
+      margin: 0 auto;
+      padding: 2.6rem 1.25rem 1.5rem;
+    }
+    .guia__marca {
+      font-family: 'Pinyon Script', cursive;
+      font-size: 2rem; line-height: 1; color: var(--bordo);
+      margin: 0 0 0.8rem;
+    }
+    .guia h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 600; font-size: clamp(1.8rem, 6vw, 2.4rem);
+      line-height: 1.15; margin: 0 0 0.6rem; text-wrap: balance;
+    }
+    .guia p { margin: 0 0 0.9rem; color: var(--tinta-suave); max-width: 54ch; }
+    .guia ol { margin: 0 0 1.4rem; padding-left: 1.2rem; color: var(--tinta-suave); max-width: 54ch; }
+    .guia li { margin-bottom: 0.45rem; }
+    .guia strong { font-weight: 500; color: var(--tinta); }
+
+    .imprimir {
+      font-family: 'Poppins', system-ui, sans-serif;
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: #FBF8F2; background: var(--bordo);
+      border: 0; border-radius: 100px;
+      padding: 0.85rem 1.6rem; cursor: pointer;
+    }
+    .imprimir:hover { background: #7C1830; }
+    .imprimir:focus-visible { outline: 2px solid var(--dorado); outline-offset: 2px; }
+
+    .rotulo-hoja {
+      max-width: 44rem; margin: 2.2rem auto 0.7rem; padding: 0 1.25rem;
+      font-size: 0.64rem; font-weight: 500; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--tinta-tenue);
+    }
+    .marco { padding: 0 1.25rem 4rem; display: flex; justify-content: center; }
+
+    /* ——————————————————— La hoja A4 ——————————————————— */
+    .hoja {
+      position: relative;
+      width: 210mm; height: 297mm;
+      background: #FFFFFF;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      box-shadow: 0 18px 50px -24px rgba(61, 46, 42, 0.55);
+    }
+    /* Las dos líneas de corte, dibujadas una sola vez para que no
+       queden dobles entre tarjeta y tarjeta. */
+    .corte {
+      position: absolute; pointer-events: none;
+      border-color: var(--linea); border-style: dashed;
+    }
+    .corte--vertical   { top: 0; bottom: 0; left: 50%; border-width: 0 0 0 0.2mm; }
+    .corte--horizontal { left: 0; right: 0; top: 50%; border-width: 0.2mm 0 0 0; }
+
+    /* ——————————————————— Cada tarjeta (A6) ——————————————————— */
+    .tarjeta {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 10mm 9mm;
+      color: var(--tinta);
+    }
+    .tarjeta__marca {
+      font-family: 'Pinyon Script', cursive;
+      font-size: 17pt; line-height: 1; color: var(--dorado);
+      margin: 0;
+    }
+    .tarjeta__filete {
+      width: 14mm; height: 0.25mm; background: var(--dorado);
+      opacity: 0.55; margin: 3.5mm 0 4.5mm;
+    }
+    .tarjeta__titulo {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 600; font-size: 19pt; line-height: 1.2;
+      color: var(--bordo);
+      margin: 0 0 9mm;
+      text-wrap: balance;
+    }
+    .tarjeta__qr {
+      width: 45mm; height: 45mm;
+      display: block;
+      color: var(--bordo);
+    }
+    .tarjeta__como {
+      font-size: 8pt; line-height: 1.6;
+      color: var(--tinta-suave);
+      margin: 9mm 0 0; max-width: 74mm;
+      text-wrap: balance;
+    }
+    .tarjeta__url {
+      font-size: 6.2pt; line-height: 1.5;
+      color: var(--tinta-tenue);
+      margin: 4mm 0 0;
+      word-break: break-all;
+    }
+    .tarjeta__hashtag {
+      font-size: 7pt; font-weight: 500;
+      letter-spacing: 0.16em;
+      color: var(--dorado);
+      margin: 4.5mm 0 0;
+    }
+
+    /* Achicar la hoja en pantallas chicas. `zoom` reacomoda el espacio
+       de verdad, así que no queda un hueco debajo como pasaría con
+       transform: scale(). Al imprimir se desactiva. */
+    @media (max-width: 900px) { .hoja { zoom: 0.72; } }
+    @media (max-width: 660px) { .hoja { zoom: 0.5;  } }
+    @media (max-width: 470px) { .hoja { zoom: 0.36; } }
+
+    /* ——————————————————— Impresión ——————————————————— */
+    @page { size: A4 portrait; margin: 0; }
+
+    @media print {
+      .guia, .rotulo-hoja { display: none !important; }
+      body { background: #FFFFFF; }
+      .marco { padding: 0; display: block; }
+      .hoja {
+        zoom: 1 !important;
+        width: 210mm; height: 297mm;
+        box-shadow: none;
+        page-break-after: avoid;
+      }
+      /* Que el navegador no descarte el bordó ni el dorado. */
+      .tarjeta__qr, .tarjeta__titulo, .tarjeta__marca,
+      .tarjeta__hashtag, .tarjeta__filete {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="guia">
+    <p class="guia__marca">Lean &amp; Nati</p>
+    <h1>Carteles para las mesas</h1>
+    <p>
+      Cada hoja trae <strong>cuatro carteles iguales</strong> con el código QR
+      que lleva a la página para subir fotos. El invitado apunta la cámara del
+      celular y sube las suyas: no necesita crearse ninguna cuenta.
+    </p>
+    <ol>
+      <li>Tocá <strong>Imprimir</strong> y elegí tamaño <strong>A4</strong>, sin márgenes y al 100 % (nada de «ajustar a la página», porque desacomoda el corte).</li>
+      <li>Marcá <strong>«Gráficos de fondo»</strong> o <em>Background graphics</em> en las opciones, si no el QR puede salir en gris.</li>
+      <li>Cortá por las <strong>dos líneas punteadas del medio</strong>. Los bordes de la hoja no se cortan: cada cartel es un cuarto exacto.</li>
+      <li>Para <strong>doce mesas</strong>, imprimí <strong>tres hojas</strong>. Conviene una o dos de más, por las dudas.</li>
+    </ol>
+    <p>
+      Quedan mucho mejor en <strong>papel de 200 a 250 gramos</strong>, crema o
+      blanco. Van sin fondo de color a propósito: en una impresora de casa un
+      fondo lleno sale manchado y gasta muchísima tinta. El color lo pone el papel.
+    </p>
+    <p>
+      <button class="imprimir" type="button" onclick="window.print()">Imprimir la hoja</button>
+    </p>
+  </div>
+
+  <p class="rotulo-hoja">Así sale impreso</p>
+
+  <div class="marco">
+    <div class="hoja">
+      <span class="corte corte--vertical"   aria-hidden="true"></span>
+      <span class="corte corte--horizontal" aria-hidden="true"></span>
+
+      <!-- Las cuatro tarjetas son idénticas. El QR se dibuja una sola vez
+           en el <symbol> de abajo y las cuatro lo reutilizan con <use>. -->
+      <div class="tarjeta">
+        <p class="tarjeta__marca">Lean &amp; Nati</p>
+        <span class="tarjeta__filete" aria-hidden="true"></span>
+        <h2 class="tarjeta__titulo">Las mejores fotos<br>las sacan ustedes</h2>
+        <svg class="tarjeta__qr" role="img" aria-label="Código QR para subir las fotos"><use href="#qr"/></svg>
+        <p class="tarjeta__como">
+          Apuntá la cámara al código y subí las fotos que saques.
+          No hace falta crear ninguna cuenta.
+        </p>
+        <p class="tarjeta__url">natalia-vergara.github.io/boda-lean-y-nati/fotos/</p>
+        <p class="tarjeta__hashtag">#BodaLeanyNati</p>
+      </div>
+
+      <div class="tarjeta">
+        <p class="tarjeta__marca">Lean &amp; Nati</p>
+        <span class="tarjeta__filete" aria-hidden="true"></span>
+        <h2 class="tarjeta__titulo">Las mejores fotos<br>las sacan ustedes</h2>
+        <svg class="tarjeta__qr" role="img" aria-label="Código QR para subir las fotos"><use href="#qr"/></svg>
+        <p class="tarjeta__como">
+          Apuntá la cámara al código y subí las fotos que saques.
+          No hace falta crear ninguna cuenta.
+        </p>
+        <p class="tarjeta__url">natalia-vergara.github.io/boda-lean-y-nati/fotos/</p>
+        <p class="tarjeta__hashtag">#BodaLeanyNati</p>
+      </div>
+
+      <div class="tarjeta">
+        <p class="tarjeta__marca">Lean &amp; Nati</p>
+        <span class="tarjeta__filete" aria-hidden="true"></span>
+        <h2 class="tarjeta__titulo">Las mejores fotos<br>las sacan ustedes</h2>
+        <svg class="tarjeta__qr" role="img" aria-label="Código QR para subir las fotos"><use href="#qr"/></svg>
+        <p class="tarjeta__como">
+          Apuntá la cámara al código y subí las fotos que saques.
+          No hace falta crear ninguna cuenta.
+        </p>
+        <p class="tarjeta__url">natalia-vergara.github.io/boda-lean-y-nati/fotos/</p>
+        <p class="tarjeta__hashtag">#BodaLeanyNati</p>
+      </div>
+
+      <div class="tarjeta">
+        <p class="tarjeta__marca">Lean &amp; Nati</p>
+        <span class="tarjeta__filete" aria-hidden="true"></span>
+        <h2 class="tarjeta__titulo">Las mejores fotos<br>las sacan ustedes</h2>
+        <svg class="tarjeta__qr" role="img" aria-label="Código QR para subir las fotos"><use href="#qr"/></svg>
+        <p class="tarjeta__como">
+          Apuntá la cámara al código y subí las fotos que saques.
+          No hace falta crear ninguna cuenta.
+        </p>
+        <p class="tarjeta__url">natalia-vergara.github.io/boda-lean-y-nati/fotos/</p>
+        <p class="tarjeta__hashtag">#BodaLeanyNati</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- El dibujo del QR, una sola vez. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="qr" viewBox="0 0 33 33">
+      <path fill="currentColor" shape-rendering="crispEdges" d="M0 0h7v1h-7zM10 0h2v1h-2zM13 0h1v1h-1zM16 0h2v1h-2zM19 0h2v1h-2zM23 0h1v1h-1zM26 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM11 1h7v1h-7zM20 1h2v1h-2zM24 1h1v1h-1zM26 1h1v1h-1zM32 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h1v1h-1zM12 2h2v1h-2zM15 2h2v1h-2zM21 2h2v1h-2zM26 2h1v1h-1zM28 2h3v1h-3zM32 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM10 3h3v1h-3zM14 3h4v1h-4zM23 3h1v1h-1zM26 3h1v1h-1zM28 3h3v1h-3zM32 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h1v1h-1zM11 4h2v1h-2zM15 4h1v1h-1zM19 4h2v1h-2zM23 4h1v1h-1zM26 4h1v1h-1zM28 4h3v1h-3zM32 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h4v1h-4zM15 5h4v1h-4zM21 5h1v1h-1zM26 5h1v1h-1zM32 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h7v1h-7zM8 7h2v1h-2zM12 7h1v1h-1zM15 7h1v1h-1zM18 7h5v1h-5zM0 8h1v1h-1zM2 8h5v1h-5zM10 8h1v1h-1zM13 8h1v1h-1zM15 8h3v1h-3zM22 8h3v1h-3zM26 8h5v1h-5zM0 9h2v1h-2zM4 9h2v1h-2zM7 9h1v1h-1zM11 9h2v1h-2zM16 9h1v1h-1zM18 9h3v1h-3zM23 9h1v1h-1zM26 9h2v1h-2zM29 9h2v1h-2zM32 9h1v1h-1zM3 10h1v1h-1zM6 10h4v1h-4zM15 10h1v1h-1zM20 10h3v1h-3zM25 10h2v1h-2zM28 10h1v1h-1zM30 10h1v1h-1zM0 11h1v1h-1zM2 11h3v1h-3zM7 11h1v1h-1zM10 11h3v1h-3zM14 11h2v1h-2zM18 11h5v1h-5zM24 11h2v1h-2zM28 11h5v1h-5zM1 12h2v1h-2zM5 12h4v1h-4zM10 12h1v1h-1zM17 12h1v1h-1zM22 12h1v1h-1zM24 12h2v1h-2zM27 12h3v1h-3zM31 12h2v1h-2zM5 13h1v1h-1zM7 13h5v1h-5zM14 13h3v1h-3zM18 13h4v1h-4zM23 13h2v1h-2zM26 13h2v1h-2zM29 13h1v1h-1zM31 13h2v1h-2zM0 14h3v1h-3zM6 14h5v1h-5zM12 14h2v1h-2zM18 14h1v1h-1zM20 14h2v1h-2zM24 14h3v1h-3zM29 14h1v1h-1zM31 14h1v1h-1zM3 15h2v1h-2zM7 15h2v1h-2zM10 15h2v1h-2zM13 15h1v1h-1zM16 15h1v1h-1zM19 15h5v1h-5zM25 15h3v1h-3zM29 15h2v1h-2zM0 16h1v1h-1zM2 16h1v1h-1zM6 16h1v1h-1zM9 16h4v1h-4zM14 16h1v1h-1zM17 16h3v1h-3zM23 16h3v1h-3zM27 16h2v1h-2zM32 16h1v1h-1zM0 17h1v1h-1zM3 17h1v1h-1zM5 17h1v1h-1zM7 17h2v1h-2zM10 17h3v1h-3zM16 17h5v1h-5zM23 17h1v1h-1zM26 17h2v1h-2zM29 17h2v1h-2zM32 17h1v1h-1zM2 18h3v1h-3zM6 18h1v1h-1zM8 18h1v1h-1zM11 18h1v1h-1zM15 18h1v1h-1zM17 18h1v1h-1zM22 18h1v1h-1zM24 18h5v1h-5zM30 18h2v1h-2zM0 19h3v1h-3zM4 19h1v1h-1zM7 19h3v1h-3zM13 19h4v1h-4zM19 19h1v1h-1zM21 19h1v1h-1zM27 19h5v1h-5zM1 20h1v1h-1zM5 20h3v1h-3zM9 20h3v1h-3zM13 20h3v1h-3zM17 20h1v1h-1zM22 20h1v1h-1zM24 20h2v1h-2zM27 20h3v1h-3zM32 20h1v1h-1zM0 21h3v1h-3zM5 21h1v1h-1zM8 21h2v1h-2zM12 21h2v1h-2zM15 21h1v1h-1zM17 21h1v1h-1zM19 21h1v1h-1zM23 21h1v1h-1zM26 21h1v1h-1zM30 21h1v1h-1zM32 21h1v1h-1zM0 22h1v1h-1zM3 22h4v1h-4zM12 22h2v1h-2zM15 22h1v1h-1zM17 22h1v1h-1zM20 22h3v1h-3zM25 22h3v1h-3zM31 22h1v1h-1zM0 23h1v1h-1zM2 23h1v1h-1zM8 23h4v1h-4zM14 23h2v1h-2zM18 23h1v1h-1zM21 23h2v1h-2zM24 23h1v1h-1zM26 23h1v1h-1zM29 23h3v1h-3zM0 24h1v1h-1zM2 24h1v1h-1zM4 24h4v1h-4zM9 24h4v1h-4zM14 24h4v1h-4zM19 24h2v1h-2zM22 24h1v1h-1zM24 24h5v1h-5zM32 24h1v1h-1zM8 25h1v1h-1zM10 25h2v1h-2zM14 25h1v1h-1zM16 25h1v1h-1zM18 25h7v1h-7zM28 25h1v1h-1zM30 25h1v1h-1zM32 25h1v1h-1zM0 26h7v1h-7zM10 26h3v1h-3zM15 26h4v1h-4zM20 26h2v1h-2zM23 26h2v1h-2zM26 26h1v1h-1zM28 26h1v1h-1zM30 26h2v1h-2zM0 27h1v1h-1zM6 27h1v1h-1zM8 27h1v1h-1zM10 27h1v1h-1zM15 27h1v1h-1zM20 27h5v1h-5zM28 27h3v1h-3zM32 27h1v1h-1zM0 28h1v1h-1zM2 28h3v1h-3zM6 28h1v1h-1zM8 28h1v1h-1zM11 28h4v1h-4zM17 28h2v1h-2zM22 28h1v1h-1zM24 28h6v1h-6zM31 28h2v1h-2zM0 29h1v1h-1zM2 29h3v1h-3zM6 29h1v1h-1zM8 29h2v1h-2zM11 29h5v1h-5zM18 29h8v1h-8zM28 29h2v1h-2zM31 29h2v1h-2zM0 30h1v1h-1zM2 30h3v1h-3zM6 30h1v1h-1zM8 30h1v1h-1zM10 30h8v1h-8zM22 30h1v1h-1zM24 30h1v1h-1zM26 30h2v1h-2zM29 30h1v1h-1zM0 31h1v1h-1zM6 31h1v1h-1zM10 31h2v1h-2zM16 31h1v1h-1zM20 31h2v1h-2zM25 31h1v1h-1zM28 31h3v1h-3zM0 32h7v1h-7zM8 32h1v1h-1zM10 32h4v1h-4zM17 32h1v1h-1zM22 32h4v1h-4zM27 32h1v1h-1zM31 32h1v1h-1z"/>
+    </symbol>
+  </svg>
+
+</body>
+</html>
