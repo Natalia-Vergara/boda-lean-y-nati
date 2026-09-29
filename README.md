@@ -310,6 +310,33 @@ pip install segno
 python3 assets/herramientas/qr-carteles.py https://…/otra-direccion/
 ```
 
+### Las tarjetas de los platos
+
+[`tarjetas.html`](tarjetas.html) son tarjetas plegadas, una por invitado: de
+un lado el «Bienvenido» con el espacio para pegar un chocolate de 3 × 3 cm,
+del otro el mismo QR de las fotos. Dobladas miden **59 × 105 mm** y se paran
+solas sobre el plato. Entran **cinco por hoja A4 apaisada**.
+
+Dos cosas que tiene el formato plegado y conviene no tocar:
+
+- **Las dos caras van del mismo lado del papel**, así que es impresión simple.
+  No hay que dar vuelta la hoja ni hacer coincidir frente con dorso.
+- **La mitad de arriba va impresa rotada 180°.** Al doblar, esa mitad gira
+  sobre el pliegue y queda derecha; si se imprimiera derecha saldría de
+  cabeza. La página muestra aparte cómo quedan las dos caras una vez dobladas,
+  porque la hoja cruda se ve rara y parece un error.
+
+La hoja es A4 apaisada dividida en cinco columnas justas (297 / 5 = 59,4 mm),
+así que sólo hay cuatro cortes rectos y ningún borde para recortar. El doblez
+se marca con dos rayitas en los costados en vez de una línea cruzando la cara.
+
+El hueco del chocolate mide 40 mm y **en papel sale blanco liso**; el recuadro
+punteado que lo marca se ve sólo en pantalla.
+
+Las cinco tarjetas de la hoja se clonan por JavaScript de la misma muestra que
+se ve en pantalla, así el texto vive en un solo lugar y no se puede
+desincronizar.
+
 ### Si el espacio se llena
 
 Al invitado no le aparece un error seco: le queda el link de Drive a mano. Las
