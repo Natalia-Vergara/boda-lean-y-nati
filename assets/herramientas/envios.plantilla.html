@@ -1,0 +1,460 @@
+<title>Invitaciones para mandar</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=IBM+Plex+Mono:wght@400&family=Pinyon+Script&family=Poppins:wght@300;400;500;600&display=swap">
+<style>
+  :root {
+    --papel:      #FBF8F2;
+    --carta:      #FFFFFF;
+    --tinta:      #3D2E2A;
+    --tinta-suave:#6B5750;
+    --tinta-tenue:#8C7970;
+    --bordo:      #61152A;
+    --vino:       #7C1830;
+    --dorado:     #A98B54;
+    --linea:      #E4D9C6;
+    --linea-tenue:#F0E8DA;
+    --hecho:      #3F6B4F;
+    --sombra:     0 1px 2px rgba(61,46,42,0.04), 0 10px 28px -20px rgba(61,46,42,0.35);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --papel:      #17120F;
+      --carta:      #211A16;
+      --tinta:      #F2E9DC;
+      --tinta-suave:#C3B2A5;
+      --tinta-tenue:#9C8B7E;
+      --bordo:      #E0A9B8;
+      --vino:       #EFC0CE;
+      --dorado:     #D2B784;
+      --linea:      #3A2C25;
+      --linea-tenue:#2B211B;
+      --hecho:      #8FBFA0;
+      --sombra:     0 1px 2px rgba(0,0,0,0.3), 0 10px 28px -20px rgba(0,0,0,0.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --papel:      #17120F;
+    --carta:      #211A16;
+    --tinta:      #F2E9DC;
+    --tinta-suave:#C3B2A5;
+    --tinta-tenue:#9C8B7E;
+    --bordo:      #E0A9B8;
+    --vino:       #EFC0CE;
+    --dorado:     #D2B784;
+    --linea:      #3A2C25;
+    --linea-tenue:#2B211B;
+    --hecho:      #8FBFA0;
+    --sombra:     0 1px 2px rgba(0,0,0,0.3), 0 10px 28px -20px rgba(0,0,0,0.7);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--papel);
+    color: var(--tinta);
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-weight: 300;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .hoja { max-width: 620px; margin: 0 auto; padding: 16px; padding-block: 2.4rem 4rem; }
+
+  /* ——— Encabezado ——— */
+  header { margin-bottom: 2rem; }
+  .marca {
+    font-family: 'Pinyon Script', cursive;
+    font-size: 2rem; line-height: 1; color: var(--bordo);
+    margin: 0 0 0.9rem;
+  }
+  h1 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 600; font-size: clamp(1.9rem, 6.5vw, 2.5rem);
+    line-height: 1.1; margin: 0 0 0.7rem; text-wrap: balance;
+  }
+  .bajada { margin: 0; color: var(--tinta-suave); max-width: 52ch; }
+
+  .totales {
+    display: flex; flex-wrap: wrap; gap: 0.5rem 1.6rem;
+    margin-top: 1.4rem; padding-top: 1.2rem;
+    border-top: 1px solid var(--linea);
+  }
+  .total .cifra {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 600; font-size: 1.8rem; line-height: 1;
+    color: var(--bordo);
+    font-variant-numeric: lining-nums tabular-nums;
+    font-feature-settings: 'lnum' 1, 'tnum' 1;
+  }
+  .total .rotulo {
+    font-size: 0.64rem; font-weight: 500; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--tinta-tenue); margin-top: 0.2rem;
+  }
+
+  /* ——— Barra de avance ——— */
+  .avance { margin: 1.6rem 0 0; }
+  .avance__texto {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 0.78rem; color: var(--tinta-tenue); margin-bottom: 0.4rem;
+  }
+  .avance__pista { height: 4px; border-radius: 4px; background: var(--linea-tenue); overflow: hidden; }
+  .avance__barra { height: 100%; width: 0; background: var(--hecho); transition: width 0.35s ease; }
+  .reiniciar {
+    background: none; border: 0; padding: 0; cursor: pointer;
+    font: inherit; font-size: 0.72rem; color: var(--tinta-tenue);
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .reiniciar:hover { color: var(--bordo); }
+
+  /* ——— Filtros ——— */
+  .filtros {
+    display: flex; flex-wrap: wrap; gap: 0.7rem 1rem;
+    align-items: center; margin-top: 2rem;
+  }
+  .buscador {
+    flex: 1 1 200px; min-width: 0;
+    font-family: 'Poppins', system-ui, sans-serif; font-size: 0.95rem;
+    color: var(--tinta); background: var(--carta);
+    border: 1px solid var(--linea); border-radius: 100px;
+    padding: 0.65rem 1rem;
+  }
+  .buscador:focus-visible { outline: 2px solid var(--dorado); outline-offset: 1px; }
+  .filtro-hechas {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    font-size: 0.8rem; color: var(--tinta-tenue); cursor: pointer; user-select: none;
+  }
+  .filtro-hechas input { width: 16px; height: 16px; accent-color: var(--hecho); cursor: pointer; }
+  .sin-resultados {
+    text-align: center; color: var(--tinta-tenue);
+    font-size: 0.9rem; margin: 2rem 0 0;
+  }
+
+  /* ——— Tarjetas ——— */
+  .lista { display: grid; gap: 0.9rem; margin-top: 2rem; list-style: none; padding: 0; }
+  .ficha {
+    background: var(--carta);
+    border: 1px solid var(--linea);
+    border-radius: 7px;
+    box-shadow: var(--sombra);
+    padding: 1.1rem 1.2rem 1.2rem;
+  }
+  .ficha--hecha { opacity: 0.6; }
+  .ficha--hecha .ficha__nombre { text-decoration: line-through; text-decoration-color: var(--tinta-tenue); }
+
+  .ficha__cabeza { display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap; }
+  .ficha__nombre {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 600; font-size: 1.35rem; line-height: 1.2;
+    color: var(--bordo); flex: 1; min-width: 0;
+  }
+  .ficha__pases {
+    font-size: 0.64rem; font-weight: 500; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--tinta-tenue);
+    border: 1px solid var(--linea); border-radius: 100px;
+    padding: 0.2rem 0.6rem; white-space: nowrap;
+  }
+
+  .ficha__link {
+    display: block; margin: 0.8rem 0 0;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.72rem; line-height: 1.6;
+    color: var(--tinta-tenue);
+    word-break: break-all;
+    background: var(--linea-tenue);
+    padding: 0.5rem 0.65rem; border-radius: 4px;
+    text-decoration: none;
+  }
+  .ficha__link:hover { color: var(--bordo); }
+
+  .ficha__mensaje {
+    margin: 0.7rem 0 0;
+    font-size: 0.86rem; line-height: 1.7;
+    color: var(--tinta-suave);
+    white-space: pre-wrap;
+    border-left: 2px solid var(--linea);
+    padding-left: 0.8rem;
+  }
+  details > summary {
+    cursor: pointer; list-style: none;
+    font-size: 0.72rem; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--tinta-tenue);
+    margin-top: 0.8rem;
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary:hover { color: var(--bordo); }
+  details[open] > summary { color: var(--bordo); }
+
+  .ficha__acciones { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; align-items: center; }
+  .boton {
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: #FBF8F2; background: var(--bordo);
+    border: 0; border-radius: 100px;
+    padding: 0.65rem 1.1rem; cursor: pointer;
+  }
+  .boton:hover { background: var(--vino); }
+  .boton--borde {
+    background: transparent; color: var(--tinta-suave);
+    border: 1px solid var(--linea);
+  }
+  .boton--borde:hover { background: var(--linea-tenue); color: var(--bordo); }
+  :where(.boton, .marca-hecho, .reiniciar):focus-visible { outline: 2px solid var(--dorado); outline-offset: 2px; }
+
+  .marca-hecho {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 0.4rem;
+    font-size: 0.72rem; color: var(--tinta-tenue); cursor: pointer;
+    user-select: none;
+  }
+  .marca-hecho input { width: 17px; height: 17px; accent-color: var(--hecho); cursor: pointer; }
+  .ficha--hecha .marca-hecho { color: var(--hecho); }
+
+  .copiado {
+    font-size: 0.7rem; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--hecho);
+    opacity: 0; transition: opacity 0.2s ease;
+  }
+  .copiado--visible { opacity: 1; }
+
+  footer {
+    margin-top: 2.6rem; padding-top: 1.4rem;
+    border-top: 1px solid var(--linea);
+    font-size: 0.83rem; color: var(--tinta-tenue);
+  }
+  footer p { margin: 0 0 0.7rem; }
+  footer p:last-child { margin-bottom: 0; }
+  footer b { color: var(--tinta-suave); font-weight: 500; }
+</style>
+
+<div class="hoja">
+  <header>
+    <p class="marca">Lean &amp; Nati</p>
+    <h1>Invitaciones para mandar</h1>
+    <p class="bajada">
+      Una tarjeta por invitación. Tocá <b>Copiar mensaje</b>, abrí su chat de
+      WhatsApp y pegá. El link ya lleva su nombre y sus lugares adentro.
+    </p>
+
+    <div class="totales">
+      <div class="total"><div class="cifra">@@TOTAL@@</div><div class="rotulo">Invitaciones</div></div>
+      <div class="total"><div class="cifra">@@LUGARES@@</div><div class="rotulo">Lugares</div></div>
+      <div class="total"><div class="cifra" id="dias">—</div><div class="rotulo">Días hasta el 25/10</div></div>
+    </div>
+
+    <div class="avance">
+      <div class="avance__texto">
+        <span id="avanceTexto">Todavía no mandaste ninguna</span>
+        <button class="reiniciar" type="button" id="btnReiniciar" hidden>empezar de nuevo</button>
+      </div>
+      <div class="avance__pista"><div class="avance__barra" id="avanceBarra"></div></div>
+    </div>
+  </header>
+
+  <div class="filtros">
+    <input class="buscador" type="search" id="buscador" placeholder="Buscar por nombre…" aria-label="Buscar por nombre" autocomplete="off">
+    <label class="filtro-hechas">
+      <input type="checkbox" id="ocultarHechas">
+      <span>Ocultar las mandadas</span>
+    </label>
+  </div>
+
+  <ul class="lista" id="lista"></ul>
+  <p class="sin-resultados" id="sinResultados" hidden>Ningún nombre coincide con la búsqueda.</p>
+
+  <footer>
+    <p>
+      <b>Los tildes se guardan en este navegador.</b> Si abrís esta página en otro
+      teléfono, el avance arranca de cero — no se comparte entre dispositivos.
+    </p>
+    <p>
+      Quién confirmó y quién falta lo ves en el panel, que lee las respuestas
+      reales. Esto es sólo para no perder la cuenta mientras mandás.
+    </p>
+  </footer>
+</div>
+
+<script>
+  const SITIO = 'https://natalia-vergara.github.io/boda-lean-y-nati/';
+  const LLAVE = 'nyl-envios-hechos';
+
+  const INVITADOS = [
+@@INVITADOS@@
+  ];
+
+  const enlace = (codigo) => `${SITIO}?i=${codigo}`;
+
+  // En singular cuando va una sola persona: un mensaje en plural a quien
+  // viene solo se nota que salió de una plantilla.
+  const mensaje = (nombre, codigo, pases) => pases === 1
+    ? `¡Hola, ${nombre}! 🤍
+
+Nos casamos el viernes 27 de noviembre y nos encantaría que nos acompañes.
+
+Acá está nuestra invitación — abrila, que tiene sorpresa:
+${enlace(codigo)}
+
+Tenés un lugar reservado. Te pedimos confirmar antes del 25 de octubre, que es cuando le entregamos la lista definitiva a la finca.
+
+¡Te esperamos!
+Lean & Nati`
+    : `¡Hola, ${nombre}! 🤍
+
+Nos casamos el viernes 27 de noviembre y nos encantaría que nos acompañen.
+
+Acá está nuestra invitación — abrila, que tiene sorpresa:
+${enlace(codigo)}
+
+Tienen ${pases} lugares reservados. Les pedimos confirmar antes del 25 de octubre, que es cuando le entregamos la lista definitiva a la finca.
+
+¡Los esperamos!
+Lean & Nati`;
+
+  /* ——— Días que faltan ——— */
+  (function contarDias() {
+    const limite = new Date('2026-10-25T23:59:59-03:00');
+    const dias = Math.ceil((limite - new Date()) / 86400000);
+    document.getElementById('dias').textContent = dias > 0 ? dias : 0;
+  })();
+
+  /* ——— Memoria de lo ya enviado ——— */
+  function leerHechos() {
+    try { return new Set(JSON.parse(localStorage.getItem(LLAVE) || '[]')); }
+    catch (e) { return new Set(); }
+  }
+  function guardarHechos(hechos) {
+    try { localStorage.setItem(LLAVE, JSON.stringify([...hechos])); }
+    catch (e) { /* ventana privada: el avance no sobrevive, y está bien */ }
+  }
+  let hechos = leerHechos();
+
+  /* ——— Copiar ——— */
+  async function copiar(texto) {
+    try {
+      await navigator.clipboard.writeText(texto);
+      return true;
+    } catch (e) {
+      const campo = document.createElement('textarea');
+      campo.value = texto;
+      campo.setAttribute('readonly', '');
+      campo.style.cssText = 'position:fixed;top:0;left:-9999px';
+      document.body.appendChild(campo);
+      campo.select();
+      campo.setSelectionRange(0, texto.length);
+      let bien = false;
+      try { bien = document.execCommand('copy'); } catch (err) { bien = false; }
+      campo.remove();
+      return bien;
+    }
+  }
+
+  /* ——— Armado ——— */
+  const lista = document.getElementById('lista');
+
+  INVITADOS.forEach(([codigo, nombre, pases]) => {
+    const texto = mensaje(nombre, codigo, pases);
+    const li = document.createElement('li');
+    li.className = 'ficha';
+    li.dataset.codigo = codigo;
+
+    li.innerHTML = `
+      <div class="ficha__cabeza">
+        <h2 class="ficha__nombre"></h2>
+        <span class="ficha__pases">${pases} ${pases === 1 ? 'lugar' : 'lugares'}</span>
+      </div>
+
+      <a class="ficha__link" target="_blank" rel="noopener"></a>
+
+      <details>
+        <summary>Ver el mensaje</summary>
+        <p class="ficha__mensaje"></p>
+      </details>
+
+      <div class="ficha__acciones">
+        <button class="boton" type="button" data-copiar="mensaje">Copiar mensaje</button>
+        <button class="boton boton--borde" type="button" data-copiar="link">Sólo el link</button>
+        <span class="copiado" role="status" aria-live="polite"></span>
+        <label class="marca-hecho">
+          <input type="checkbox" id="hecho-${codigo}">
+          <span>Mandada</span>
+        </label>
+      </div>`;
+
+    li.querySelector('.ficha__nombre').textContent = nombre;
+    const a = li.querySelector('.ficha__link');
+    a.href = enlace(codigo);
+    a.textContent = enlace(codigo);
+    li.querySelector('.ficha__mensaje').textContent = texto;
+
+    const aviso = li.querySelector('.copiado');
+    let reloj = null;
+    li.querySelectorAll('[data-copiar]').forEach((boton) => {
+      boton.addEventListener('click', async () => {
+        const bien = await copiar(boton.dataset.copiar === 'link' ? enlace(codigo) : texto);
+        aviso.textContent = bien ? '¡Copiado!' : 'Copialo del texto de arriba';
+        aviso.classList.add('copiado--visible');
+        clearTimeout(reloj);
+        reloj = setTimeout(() => aviso.classList.remove('copiado--visible'), 2200);
+        if (!bien) li.querySelector('details').open = true;
+      });
+    });
+
+    const tilde = li.querySelector('input[type="checkbox"]');
+    tilde.checked = hechos.has(codigo);
+    li.classList.toggle('ficha--hecha', tilde.checked);
+    tilde.addEventListener('change', () => {
+      if (tilde.checked) hechos.add(codigo); else hechos.delete(codigo);
+      li.classList.toggle('ficha--hecha', tilde.checked);
+      guardarHechos(hechos);
+      pintarAvance();
+      if (document.getElementById('ocultarHechas').checked) filtrar();
+    });
+
+    lista.appendChild(li);
+  });
+
+  /* ——— Avance ——— */
+  function pintarAvance() {
+    const total = INVITADOS.length;
+    const n = hechos.size;
+    document.getElementById('avanceBarra').style.width = `${(n / total) * 100}%`;
+    document.getElementById('avanceTexto').textContent =
+      n === 0 ? 'Todavía no mandaste ninguna'
+      : n === total ? '¡Listo! Las mandaste todas 🤍'
+      : `Mandaste ${n} de ${total}`;
+    document.getElementById('btnReiniciar').hidden = n === 0;
+  }
+
+  /* ——— Filtrar ——— */
+  const sinAcentos = (t) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+  function filtrar() {
+    const busca = sinAcentos(document.getElementById('buscador').value.trim());
+    const ocultar = document.getElementById('ocultarHechas').checked;
+    let visibles = 0;
+
+    document.querySelectorAll('.ficha').forEach((ficha) => {
+      const nombre = sinAcentos(ficha.querySelector('.ficha__nombre').textContent);
+      const coincide = !busca || nombre.includes(busca);
+      const mostrar = coincide && !(ocultar && hechos.has(ficha.dataset.codigo));
+      ficha.hidden = !mostrar;
+      if (mostrar) visibles++;
+    });
+
+    document.getElementById('sinResultados').hidden = visibles > 0;
+  }
+
+  document.getElementById('buscador').addEventListener('input', filtrar);
+  document.getElementById('ocultarHechas').addEventListener('change', filtrar);
+
+  document.getElementById('btnReiniciar').addEventListener('click', () => {
+    hechos = new Set();
+    guardarHechos(hechos);
+    document.querySelectorAll('.ficha').forEach((ficha) => {
+      ficha.classList.remove('ficha--hecha');
+      ficha.querySelector('input[type="checkbox"]').checked = false;
+    });
+    pintarAvance();
+    filtrar();
+  });
+
+  pintarAvance();
+  filtrar();
+</script>

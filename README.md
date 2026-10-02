@@ -405,3 +405,23 @@ python3 -m http.server 8080
 ## Créditos
 
 Diseño y desarrollo a medida para Lean & Nati. Paleta inspirada en su moodboard: bordó profundo, vino, marfil, champagne y dorado — el bordó de las damas de honor como acento principal.
+
+## La lista de invitados
+
+`invitados.js` **no se edita a mano**. La fuente es
+[`assets/herramientas/lista.json`](assets/herramientas/lista.json), y de ahí
+sale todo:
+
+```sh
+pip install openpyxl
+python3 assets/herramientas/generar-invitados.py
+```
+
+Escribe `invitados.js` (que es lo que usa el sitio) y, en
+`assets/herramientas/salida/`, la página con los mensajes listos para pegar en
+WhatsApp y la planilla. Esa carpeta no se versiona: se regenera.
+
+**Los códigos son permanentes.** Una vez que un link salió por WhatsApp,
+cambiar su código lo rompe. Si hay que corregir un nombre se cambia el nombre
+y el código queda como está — por eso «Felix y Olinda» sigue viviendo en
+`santos-y-olinda`. El generador aborta si encuentra códigos repetidos.
