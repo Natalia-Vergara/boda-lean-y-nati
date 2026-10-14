@@ -1,36 +1,72 @@
 # El plan gratuito de Supabase suspende el proyecto cuando pasa una semana
-# sin recibir consultas. Esta tarea le hace un pedido mínimo cada tres días
-# para que la base siga despierta mientras los invitados confirman.
+# sin actividad. Esta tarea lo mantiene despierto mientras los invitados
+# confirman.
+#
+# Antes corría cada tres días y hacía una sola consulta de lectura. Eso no
+# alcanzó: el 13 de octubre contestó 200 y al día siguiente Supabase pausó
+# el proyecto igual. No sabemos con certeza qué mide Supabase —su
+# documentación no lo dice—, así que esta versión ataca las dos hipótesis
+# razonables:
+#
+#   1. Que tres días sea demasiado espacio → ahora corre todos los días.
+#   2. Que una lectura que devuelve vacío no cuente como actividad de
+#      verdad → ahora además escribe una fila en `latidos`. Una escritura
+#      deja rastro en el disco de la base y es difícil que no cuente.
 #
 # La clave es la anónima (la misma que ya viaja en script.js, pública por
-# diseño) y el pedido es de sólo lectura: las políticas de la base no
-# permiten leer nada, así que la respuesta vuelve vacía. Alcanza para que
-# el proyecto cuente como activo.
+# diseño). Las políticas de la base sólo permiten insertar, nunca leer ni
+# borrar, así que esta tarea no puede tocar las confirmaciones.
 
 name: Mantener la base despierta
 
 on:
   schedule:
-    - cron: '0 12 */3 * *'   # cada 3 días, 12:00 UTC (9:00 en Argentina)
-  workflow_dispatch:          # y también a mano, desde la pestaña Actions
+    - cron: '0 12 * * *'   # todos los días a las 12:00 UTC (9:00 en Argentina)
+  workflow_dispatch:        # y también a mano, desde la pestaña Actions
 
 jobs:
   despertar:
     runs-on: ubuntu-latest
     steps:
-      - name: Consultar la base
+      - name: Consultar y latir
+        env:
+          BASE: https://mjvhfvcpkrzpufrpklrv.supabase.co
+          CLAVE: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdmhmdmNwa3J6cHVmcnBrbHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MTc4NjksImV4cCI6MjEwNDQ5Mzg2OX0.r9gSC7MoNaAxQQo3oQtZmZXkMyOlYDJe6G1rphYhb50
         run: |
-          URL="https://mjvhfvcpkrzpufrpklrv.supabase.co/rest/v1/confirmaciones?select=id&limit=1"
-          CLAVE="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1qdmhmdmNwa3J6cHVmcnBrbHJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5MTc4NjksImV4cCI6MjEwNDQ5Mzg2OX0.r9gSC7MoNaAxQQo3oQtZmZXkMyOlYDJe6G1rphYhb50"
+          # ——— 1. Leer: sirve para saber si la base responde ———
+          leer=$(curl -s -o /tmp/leido -w '%{http_code}' \
+            -H "apikey: $CLAVE" -H "Authorization: Bearer $CLAVE" \
+            "$BASE/rest/v1/confirmaciones?select=id&limit=1")
 
-          codigo=$(curl -s -o /tmp/respuesta -w '%{http_code}' \
-            -H "apikey: $CLAVE" -H "Authorization: Bearer $CLAVE" "$URL")
+          echo "Lectura: HTTP $leer"
 
-          echo "Respuesta HTTP: $codigo"
-          cat /tmp/respuesta
-
-          if [ "$codigo" != "200" ]; then
-            echo "::error::La base no respondió como se esperaba (HTTP $codigo). Puede estar pausada: entrar a supabase.com y tocar «Resume project»."
+          if [ "$leer" != "200" ]; then
+            echo "::error::La base no responde (HTTP $leer). Lo más probable es que esté pausada: entrar a supabase.com, abrir el proyecto Boda Lean&Nati y tocar «Restore project». Tarda un par de minutos."
+            cat /tmp/leido
             exit 1
           fi
-          echo "La base está despierta."
+
+          # ——— 2. Escribir: es lo que de verdad deja rastro en la base ———
+          # Si la tabla `latidos` todavía no existe, avisa pero no falla:
+          # la lectura de arriba ya confirmó que la base está viva.
+          latir=$(curl -s -o /tmp/latido -w '%{http_code}' -X POST \
+            -H "apikey: $CLAVE" -H "Authorization: Bearer $CLAVE" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d '{"origen":"github-actions"}' \
+            "$BASE/rest/v1/latidos")
+
+          echo "Latido: HTTP $latir"
+
+          case "$latir" in
+            20*)
+              echo "La base está despierta y quedó el latido anotado."
+              ;;
+            404)
+              echo "::warning::Falta crear la tabla «latidos». Está el SQL en el README, sección «El proyecto se pausa solo». Mientras tanto sólo se hace la lectura, que es lo que ya se pausó una vez."
+              ;;
+            *)
+              echo "::warning::El latido no se pudo anotar (HTTP $latir). La base responde igual."
+              cat /tmp/latido
+              ;;
+          esac

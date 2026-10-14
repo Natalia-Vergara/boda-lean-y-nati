@@ -352,22 +352,51 @@ los formularios caen en el respaldo de WhatsApp.
 
 Para reactivarlo: supabase.com → el proyecto → **Resume project**.
 
-Para que no vuelva a pasar, el repositorio incluye la tarea
-[`.github/workflows/mantener-base-despierta.yml`](.github/workflows/mantener-base-despierta.yml),
-que cada 3 días le hace a la base un pedido mínimo de sólo lectura. Se
-puede disparar a mano desde la pestaña **Actions** del repositorio. Dos
-advertencias:
+El repositorio incluye la tarea
+[`.github/workflows/mantener-base-despierta.yml`](.github/workflows/mantener-base-despierta.yml)
+para evitarlo. **La primera versión no alcanzó**: corría cada tres días y
+hacía una sola consulta de lectura. El 13 de octubre de 2026 contestó
+`HTTP 200` y al día siguiente Supabase pausó el proyecto igual.
 
-- GitHub **desactiva las tareas programadas** de los repositorios sin
-  actividad durante 60 días; si el repositorio queda quieto mucho tiempo,
-  conviene revisar la pestaña *Actions*.
-- Si se acerca la fecha y hace falta garantía total, el plan Pro de
-  Supabase no pausa nunca y se cobra por mes: se puede contratar sólo
-  durante las semanas en que los invitados confirman y bajarlo después.
+La documentación de Supabase no dice qué mide exactamente, así que la
+versión nueva ataca las dos hipótesis razonables:
 
-Sin políticas de lectura, nadie puede consultar ni borrar las respuestas
-desde el sitio. Las confirmaciones se ven desde el panel de Supabase, que
-usa credenciales propias y permite exportar a CSV.
+- **Corre todos los días** en vez de cada tres, por si tres días era
+  demasiado espacio.
+- **Además de leer, escribe.** Una lectura que devuelve vacío puede no
+  contar como actividad de verdad; una escritura deja rastro en el disco de
+  la base y es difícil que no cuente.
+
+La escritura va a una tabla aparte, para no ensuciar las confirmaciones:
+
+```sql
+create table if not exists latidos (
+  id        bigint generated always as identity primary key,
+  creado_en timestamptz not null default now(),
+  origen    text
+);
+
+alter table latidos enable row level security;
+
+drop policy if exists "la tarea puede latir" on latidos;
+create policy "la tarea puede latir"
+  on latidos for insert to anon with check (true);
+```
+
+Mientras esa tabla no exista, la tarea avisa pero no falla: la lectura
+alcanza para saber si la base responde.
+
+Si la base igual se pausa, la tarea **falla con error al día siguiente** y
+GitHub manda un mail. Para reactivarla: supabase.com → el proyecto →
+**Restore project**.
+
+**Lo único que lo evita con certeza es el plan Pro** (US$ 25 por mes), que
+no pausa nunca. Para un evento con fecha puede valer la pena contratarlo
+sólo durante las semanas que importan y darlo de baja después.
+
+Mientras está pausada no se pierde nada: los formularios de la invitación
+caen solos en el respaldo de WhatsApp, así que ninguna confirmación se
+pierde. Lo que no anda es el panel.
 
 ## Probar en la computadora
 
