@@ -35,6 +35,16 @@ const CONFIG = {
   // WhatsApp de los novios
   whatsapp: '542215864142',
 
+  /* Confirmaciones.
+     Con `cerradas: true` la invitación deja de pedirlas: en vez del botón
+     muestra el aviso de que el plazo venció y ofrece escribir por WhatsApp.
+     Es un interruptor y no una fecha a propósito — el cierre lo deciden los
+     novios, no el reloj del teléfono del invitado, que puede estar en
+     cualquier huso o directamente mal. */
+  confirmaciones: {
+    cerradas: true,
+  },
+
   /* Base de datos (Supabase).
      Mientras falte alguno de los dos datos, los formularios abren WhatsApp con el
      mensaje ya escrito, así la invitación funciona igual sin configurar
@@ -90,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
     iniciarMusica();
     iniciarCuentaRegresiva();
     iniciarFotosFinca();
+    iniciarCierreConfirmaciones();
     iniciarVentanas();
     iniciarAlbum();
     iniciarCopiarAlias();
@@ -119,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
   iniciarAnimacionesScroll();
   iniciarCuentaRegresiva();
   iniciarFotosFinca();
+  iniciarCierreConfirmaciones();
   iniciarVentanas();
   iniciarAlbum();
   iniciarCopiarAlias();
@@ -825,6 +837,8 @@ function iniciarAtajoConfirmar() {
   const atajo = $('#btnAtajoConfirmar');
   const destino = $('#confirmacion');
   if (!atajo || !destino) return;
+  // Con el plazo vencido el atajo sólo llevaría a un aviso: se va.
+  if (CONFIG.confirmaciones.cerradas) { atajo.remove(); return; }
 
   let enLaSeccion = false;
 
@@ -845,6 +859,27 @@ function iniciarAtajoConfirmar() {
     const abierta = document.body.dataset.estado === 'abierta';
     atajo.classList.toggle('atajo--visible', abierta && bajoLaPortada && !enLaSeccion);
   }
+}
+
+/* ————— 13b-bis. CONFIRMACIONES CERRADAS ————— */
+/* Enciende la cara «cerrada» de la invitación. Qué se ve y qué no lo
+   reparte el CSS a partir de este atributo, así que todo el texto vive en
+   el HTML y no acá. */
+function iniciarCierreConfirmaciones() {
+  if (!CONFIG.confirmaciones.cerradas) return;
+
+  document.body.dataset.confirmaciones = 'cerradas';
+
+  // El mensaje sale con el nombre puesto si entró por su link personalizado,
+  // así no tienen que explicar quiénes son.
+  const invitado = window.__invitado;
+  const quien = invitado ? `Soy ${invitado.nombre}. ` : '';
+  const mensaje = `¡Hola! ${quien}Vi que las confirmaciones para la boda ya ` +
+    'cerraron, pero quería consultarles un caso particular.';
+
+  $$('[data-cerrado-whatsapp]').forEach((boton) => {
+    boton.href = enlaceWhatsapp(mensaje);
+  });
 }
 
 /* ————— 13c. COMPARTIR LA INVITACIÓN ————— */

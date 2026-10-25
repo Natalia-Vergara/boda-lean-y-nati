@@ -991,6 +991,44 @@ body[data-estado="abierta"] .hero__scroll.hero__scroll--oculto { opacity: 0; }
   background: rgba(255, 255, 255, 0.5);
 }
 
+/* El aviso de que el plazo ya cerró. Reemplaza al botón de confirmar
+   cuando CONFIG.confirmaciones.cerradas está en true. */
+.cerrado {
+  max-width: 46ch;
+  margin: 0 auto;
+  display: grid; gap: 0.8rem;
+  border: var(--borde-fino);
+  border-radius: 4px;
+  padding: 1.8rem 1.6rem;
+  background: rgba(255, 255, 255, 0.5);
+}
+.cerrado__titulo {
+  font-family: var(--f-titulos); font-weight: 600;
+  font-size: 1.25rem; line-height: 1.3;
+  color: var(--bordo);
+  margin: 0;
+}
+.cerrado__texto {
+  font-family: var(--f-titulos); font-weight: 500;
+  font-size: 0.98rem; line-height: 1.8;
+  color: var(--tinta-suave);
+  margin: 0;
+}
+.cerrado__boton { justify-self: center; margin-top: 0.6rem; }
+
+/* Dentro de la ventana no hace falta el marco: la ventana ya es uno. */
+.cerrado--ventana {
+  border: 0; background: none; padding: 0; text-align: center;
+}
+
+/* Las dos caras de la invitación. Lo que sobra no se oculta: se saca del
+   todo, porque varios de estos elementos traen su propio `display` y le
+   ganarían a un `hidden` común. */
+body[data-confirmaciones="cerradas"] [data-si-abierto],
+body:not([data-confirmaciones="cerradas"]) [data-si-cerrado] {
+  display: none !important;
+}
+
 /* ————— 15. REGALOS ————— */
 .regalos { background: var(--papel-suave); }
 /* Tarjeta única con los datos de la cuenta */

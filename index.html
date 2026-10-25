@@ -769,10 +769,15 @@
                 <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </summary>
-            <div class="faq__respuesta"><p>Hasta el <strong>25 de octubre</strong>. Después de esa fecha no vamos a poder
+            <div class="faq__respuesta">
+              <p data-si-abierto>Hasta el <strong>25 de octubre</strong>. Después de esa fecha no vamos a poder
   hacer excepciones: tenemos que entregarle la lista definitiva a la finca, y sin
   confirmación no van a poder dejarte entrar el día del evento. No es un capricho
-  nuestro, es cómo trabajan ellos.</p></div>
+  nuestro, es cómo trabajan ellos.</p>
+              <p data-si-cerrado>El plazo era hasta el <strong>25 de octubre</strong> y ya pasó: la lista
+  definitiva está entregada. Si el tuyo es un caso particular, escribinos por
+  WhatsApp y lo vemos.</p>
+            </div>
           </details>
         </div>
 
@@ -799,17 +804,35 @@
           más importantes de nuestras vidas.
         </p>
         <p class="parrafo rsvp__pases" id="rsvpPases" hidden data-anim="fade-up" data-anim-delay="0.1"></p>
-        <p class="parrafo rsvp__fecha-limite" data-anim="fade-up" data-anim-delay="0.15">
+        <p class="parrafo rsvp__fecha-limite" data-si-abierto data-anim="fade-up" data-anim-delay="0.15">
           Por favor confirmar asistencia antes del <strong>25 de octubre</strong>.
         </p>
 
-        <button class="boton boton--vino rsvp__whatsapp" id="btnWhatsapp"
+        <button class="boton boton--vino rsvp__whatsapp" id="btnWhatsapp" data-si-abierto
                 data-abrir="modalConfirmar" data-anim="zoom" data-anim-delay="0.25" data-cursor="hover">
           <span class="boton__texto">Confirmar aquí</span>
           <span class="boton__brillo" aria-hidden="true"></span>
         </button>
 
-        <div class="rsvp__nota" data-anim="fade-up" data-anim-delay="0.35">
+        <!-- Lo que se ve cuando el plazo ya pasó. Lo enciende
+             CONFIG.confirmaciones.cerradas en script.js. -->
+        <div class="cerrado" data-si-cerrado data-anim="fade-up" data-anim-delay="0.15">
+          <p class="cerrado__titulo">El plazo para confirmar ya cerró</p>
+          <p class="cerrado__texto">
+            Cerramos las confirmaciones el <strong>25 de octubre</strong>, porque ya le
+            entregamos la lista definitiva a la finca.
+          </p>
+          <p class="cerrado__texto">
+            Si el tuyo es un caso particular, escribinos por WhatsApp y lo vemos.
+          </p>
+          <a class="boton boton--vino cerrado__boton" data-cerrado-whatsapp
+             target="_blank" rel="noopener" data-cursor="hover">
+            <span class="boton__texto">Escribinos por WhatsApp</span>
+            <span class="boton__brillo" aria-hidden="true"></span>
+          </a>
+        </div>
+
+        <div class="rsvp__nota" data-si-abierto data-anim="fade-up" data-anim-delay="0.35">
           <p>
             La finca nos solicita tener la lista definitiva de invitados con anticipación,
             ya que el ingreso al evento se realizará únicamente con nombre y apellido.
@@ -902,9 +925,10 @@
         <path d="M22 5l-1.5-3M26 5l1.5-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
       </svg>
 
-      <h2 class="modal__titulo" id="tituloConfirmar">¿Venís al casamiento?</h2>
+      <h2 class="modal__titulo" id="tituloConfirmar" data-si-abierto>¿Venís al casamiento?</h2>
+      <h2 class="modal__titulo" data-si-cerrado>Las confirmaciones ya cerraron</h2>
 
-      <form class="modal__form" id="formConfirmar" novalidate>
+      <form class="modal__form" id="formConfirmar" data-si-abierto novalidate>
         <div class="modal__opciones" role="radiogroup" aria-label="¿Asistís?">
           <label class="opcion">
             <input type="radio" name="asiste" value="Sí, asisto" checked>
@@ -944,6 +968,24 @@
 
         <p class="modal__estado" role="status" aria-live="polite"></p>
       </form>
+
+      <!-- Red de seguridad: si alguien abre la ventana con el plazo vencido
+           —un link viejo, la página guardada en el teléfono— ve esto y no un
+           formulario que no va a poder enviar. -->
+      <div class="cerrado cerrado--ventana" data-si-cerrado>
+        <p class="cerrado__texto">
+          Cerramos las confirmaciones el <strong>25 de octubre</strong>, porque ya le
+          entregamos la lista definitiva a la finca.
+        </p>
+        <p class="cerrado__texto">
+          Si el tuyo es un caso particular, escribinos por WhatsApp y lo vemos.
+        </p>
+        <a class="boton boton--vino cerrado__boton" data-cerrado-whatsapp
+           target="_blank" rel="noopener" data-cursor="hover">
+          <span class="boton__texto">Escribinos por WhatsApp</span>
+          <span class="boton__brillo" aria-hidden="true"></span>
+        </a>
+      </div>
 
       <div class="modal__hecho" id="hechoConfirmar" hidden>
         <svg class="modal__hecho-tilde" viewBox="0 0 48 48" fill="none" aria-hidden="true">

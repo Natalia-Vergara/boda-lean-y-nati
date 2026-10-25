@@ -435,6 +435,33 @@ python3 -m http.server 8080
 
 Diseño y desarrollo a medida para Lean & Nati. Paleta inspirada en su moodboard: bordó profundo, vino, marfil, champagne y dorado — el bordó de las damas de honor como acento principal.
 
+## Cerrar las confirmaciones
+
+Cuando pasa la fecha límite, en `script.js`:
+
+```js
+confirmaciones: {
+  cerradas: true,
+},
+```
+
+Con eso la invitación cambia de cara: en lugar del botón «Confirmar aquí»
+muestra el aviso de que el plazo venció y un botón para escribir por
+WhatsApp, saca el atajo flotante, esconde la fecha límite y la nota de la
+finca, y la pregunta frecuente pasa a estar en pasado. La ventana del
+formulario también queda cubierta, por si alguien llega con un link viejo o
+con la página guardada en el teléfono.
+
+**Es un interruptor y no una fecha a propósito.** Una fecha la compararía
+contra el reloj del teléfono del invitado, que puede estar en otro huso o
+directamente mal; el cierre lo deciden los novios. Poner `false` devuelve
+todo como estaba.
+
+El reparto de qué se ve lo hace el CSS a partir de `data-confirmaciones` en
+el `<body>`: los elementos marcados con `data-si-abierto` y `data-si-cerrado`
+en `index.html`. Así los dos textos viven en el HTML y no repartidos entre
+el HTML y el JavaScript.
+
 ## La lista de invitados
 
 `invitados.js` **no se edita a mano**. La fuente es
