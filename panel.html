@@ -343,7 +343,12 @@
   const $ = (sel, raiz = document) => raiz.querySelector(sel);
 
   const BALDE = 'fotos-invitados';
-  const TOPE_GB = 1;        // lo que da el plan gratuito de Supabase
+
+  /* Cuánto espacio hay. Al contratar Pro hay que cambiar esta palabra por
+     'pro', si no el panel avisa que está lleno cuando todavía sobra muchísimo
+     —y encima en la noche de la boda, que es cuando más se mira. */
+  const PLAN = 'gratis';
+  const TOPE_GB = { gratis: 1, pro: 100 }[PLAN];
 
   let sesion = null;        // { access_token, refresh_token, vence }
   let confirmaciones = [];
@@ -516,7 +521,7 @@
       const porciento = Math.round((usado / TOPE_GB) * 100);
       celdas.push({
         valor: fotos.cantidad,
-        nombre: 'Fotos de los invitados',
+        nombre: 'Fotos y videos',
         detalle: `${usado.toFixed(2)} GB de ${TOPE_GB} · ${porciento}% del espacio`,
         alerta: porciento >= 80,
       });

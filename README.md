@@ -236,12 +236,26 @@ Achicar no es sólo por el espacio: con la señal de Los Talas, subir 4 MB puede
 tardar medio minuto por foto. Comprimida tarda segundos. **Es lo que hace que
 funcione la noche del casamiento.**
 
-Los **videos no van acá** — uno solo ocupa lo que doscientas fotos. La página
-los deriva a la carpeta de Drive que se configure en `CONFIG.carpetaDrive`;
-mientras esté vacía, ese bloque no se muestra.
+Los **videos sí entran**, pero piden el plan **Pro**: el gratuito da 1 GB y un
+video de celular pesa unos 65 MB por minuto en 1080p (190 MB en 4K), así que
+una boda entera se va a varios GB. Con Pro son 100 GB y sobra.
 
-El panel muestra cuántas fotos hay y cuánto espacio queda, y avisa en rojo al
-llegar al 80 %.
+Los videos viajan **sin achicar**: el canvas del navegador sólo sabe de
+imágenes, no hay forma de recomprimir un video del lado del cliente. Por eso
+hay un tope por archivo y un aviso de que conviene subirlos con wifi.
+
+La subida va por `XMLHttpRequest` y no por `fetch`, que es la única forma de
+saber cuánto lleva subido. Con una foto da igual, pero un video de 300 MB
+tarda minutos: sin una barra que se mueva, el invitado piensa que se colgó y
+cierra la página.
+
+Si algo no entra igual, queda la carpeta de Drive que se configure en
+`CONFIG.carpetaDrive`; mientras esté vacía, ese bloque no se muestra.
+
+El panel muestra cuántos archivos hay y cuánto espacio queda, y avisa en rojo
+al llegar al 80 %. **Al contratar Pro hay que cambiar `PLAN` a `'pro'` en
+`panel.html`**, si no el panel avisa que está lleno cuando todavía sobra
+muchísimo — y encima la noche de la boda, que es cuando más se mira.
 
 ### Cómo habilitarlo
 
@@ -249,8 +263,12 @@ llegar al 80 %.
 
 - Nombre: `fotos-invitados`
 - **Public bucket: NO** (así nadie puede mirar las fotos de los demás)
-- *Additional configuration* → **Restrict file upload size**: 50 MB
-- *Allowed MIME types*: `image/*`
+- *Additional configuration* → **Restrict file upload size**: 500 MB
+- *Allowed MIME types*: `image/*,video/*`
+
+Ese tope de 500 MB tiene que coincidir con `CONFIG.pesoMaximoVideo` en
+`fotos.html`. Si acá entra y allá no, el invitado espera toda la subida para
+recibir un error; con los dos iguales, se le avisa antes de empezar.
 
 **2. Los permisos.** En el *SQL Editor*, cambiando el correo por el real:
 
