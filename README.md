@@ -372,6 +372,33 @@ Al invitado no le aparece un error seco: le queda el link de Drive a mano. Las
 salidas son dos: derivar todo a Drive, o contratar el plan **Pro** de Supabase
 (US$ 25 por mes, 100 GB) sólo durante noviembre y darlo de baja después.
 
+### La galería del panel
+
+El panel muestra las fotos y los videos en grilla, los más nuevos primero.
+Tres cosas que no son obvias:
+
+- **El balde es privado**, así que una etiqueta `<img>` no puede traer el
+  archivo: no sabe mandar la contraseña. Por eso el panel pide **links
+  firmados** (`POST /storage/v1/object/sign/<balde>`, de a 100 por vez) que
+  duran dos horas. Si se vencen, «Actualizar» los renueva.
+- Las fotos van con `loading="lazy"` y los videos con `preload="metadata"`:
+  sin eso, mil archivos empiezan a bajar todos juntos al abrir el panel.
+- La **transformación de imágenes** de Supabase (miniaturas servidas ya
+  achicadas) es de pago, así que acá se muestran los archivos enteros
+  encogidos por CSS. Con fotos de 0,2 MB no se nota.
+
+**«Descargar todo»** arma el `.zip` en el propio navegador, sin librerías:
+están el CRC32 y las cabeceras del formato escritos a mano en `panel.html`.
+Va **sin comprimir** a propósito —fotos y videos ya vienen comprimidos,
+apretarlos otra vez no achica nada y tardaría una eternidad— y **corta en
+tandas de 300 MB**, porque un solo zip con la boda entera se come la memoria
+del navegador y la pestaña se cae justo cuando más duele. Si un archivo solo
+pasa los 300 MB, va en su propio zip.
+
+Verificado de punta a punta contra un Supabase de mentira: los `.zip` pasan
+`unzip -t` y cada archivo sale **idéntico al original** (mismo SHA-256),
+tanto en una tanda como repartidos en varias.
+
 ### El proyecto se pausa solo (plan gratuito)
 
 Supabase **suspende los proyectos del plan gratuito que pasan 7 días sin

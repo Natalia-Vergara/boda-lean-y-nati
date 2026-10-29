@@ -248,6 +248,44 @@
     .pendiente b { font-weight: 500; color: var(--tinta); }
 
     .nota-pie { font-size: 0.8rem; color: var(--tinta-tenue); margin-top: 0.7rem; }
+
+    /* ——— Galería ——— */
+    .galeria {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+      gap: 0.5rem;
+    }
+    .pieza {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 4px;
+      overflow: hidden;
+      background: var(--papel-hondo, #F4EDE1);
+    }
+    .pieza__medio {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+      background: #000;
+    }
+    .pieza img.pieza__medio { background: transparent; }
+    .pieza__quitar {
+      position: absolute; top: 4px; right: 4px;
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 0; cursor: pointer;
+      background: rgba(23, 18, 15, 0.62); color: #FBF8F2;
+      font-size: 0.85rem; line-height: 1;
+      opacity: 0; transition: opacity 0.15s ease;
+    }
+    .pieza:hover .pieza__quitar,
+    .pieza__quitar:focus-visible { opacity: 1; }
+    @media (hover: none) { .pieza__quitar { opacity: 1; } }
+    .pieza__rotulo {
+      position: absolute; left: 4px; bottom: 4px;
+      padding: 0.1rem 0.4rem; border-radius: 100px;
+      background: rgba(23, 18, 15, 0.62); color: #FBF8F2;
+      font-size: 0.62rem; letter-spacing: 0.04em;
+    }
+    .galeria__vacia { color: var(--tinta-tenue); font-size: 0.9rem; margin: 0; }
     a { color: var(--bordo); }
   </style>
 </head>
@@ -319,6 +357,16 @@
         <button class="boton boton--suave" type="button" id="botonCsvCanciones">Descargar Excel</button>
       </div>
       <div class="tabla-envoltura" id="tablaCanciones"></div>
+    </section>
+
+    <section class="bloque" id="bloqueGaleria" hidden>
+      <div class="bloque__cabeza">
+        <h2>Fotos y videos</h2>
+        <button class="boton boton--suave" type="button" id="botonBajarTodo">Descargar todo</button>
+      </div>
+      <p class="galeria__vacia" id="galeriaVacia" hidden>Todavía no subió nadie.</p>
+      <div class="galeria" id="galeria"></div>
+      <p class="nota-pie" id="notaGaleria"></p>
     </section>
 
     <p class="nota-pie" style="text-align:center; margin-top:2.4rem;">
@@ -453,13 +501,14 @@
     return respuesta.json();
   }
 
-  /** Cuántas fotos subieron los invitados y cuánto ocupan */
+  /** Qué subieron los invitados: la lista, cuántos son y cuánto ocupan */
   async function medirFotos() {
     const token = await permiso();
-    let cantidad = 0, bytes = 0, pagina = 0;
+    const archivos = [];
+    let bytes = 0, pagina = 0;
 
-    // Se pide de a 1000; con más de 5000 fotos el número queda corto, pero
-    // para entonces el espacio ya habría avisado de sobra.
+    // Se pide de a 1000; con más de 5000 archivos la cuenta queda corta,
+    // pero para entonces el espacio ya habría avisado de sobra.
     while (pagina < 5) {
       const respuesta = await fetch(`${BASE.url}/storage/v1/object/list/${BALDE}`, {
         method: 'POST',
@@ -473,12 +522,61 @@
       if (!respuesta.ok) throw new Error(`fotos: ${respuesta.status}`);
       const lote = await respuesta.json();
       if (!Array.isArray(lote) || !lote.length) break;
-      cantidad += lote.length;
-      bytes += lote.reduce((t, f) => t + ((f.metadata && f.metadata.size) || 0), 0);
+      for (const f of lote) {
+        // El listado devuelve también la carpeta en sí, sin metadatos
+        if (!f.name || !f.metadata) continue;
+        archivos.push({
+          nombre: f.name,
+          bytes: f.metadata.size || 0,
+          tipo: f.metadata.mimetype || '',
+          cuando: f.created_at || f.updated_at || '',
+        });
+        bytes += f.metadata.size || 0;
+      }
       if (lote.length < 1000) break;
       pagina++;
     }
-    return { cantidad, bytes };
+
+    // Los más nuevos primero. El nombre arranca con la hora de subida, así
+    // que sirve de desempate si a alguno le falta la fecha.
+    archivos.sort((a, b) => (b.cuando || '').localeCompare(a.cuando || '')
+                          || b.nombre.localeCompare(a.nombre));
+
+    return { archivos, cantidad: archivos.length, bytes };
+  }
+
+  /** Links temporales para poder mostrar archivos de un balde privado.
+      Se piden de a 100 porque la lista puede ser larga. */
+  async function firmar(nombres, segundos = 7200) {
+    const token = await permiso();
+    const firmados = new Map();
+
+    for (let i = 0; i < nombres.length; i += 100) {
+      const tanda = nombres.slice(i, i + 100);
+      const respuesta = await fetch(`${BASE.url}/storage/v1/object/sign/${BALDE}`, {
+        method: 'POST',
+        headers: {
+          apikey: BASE.clave,
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ expiresIn: segundos, paths: tanda }),
+      });
+      if (!respuesta.ok) throw new Error(`firmar: ${respuesta.status} ${await respuesta.text()}`);
+      for (const f of await respuesta.json()) {
+        if (f.signedURL) firmados.set(f.path, `${BASE.url}/storage/v1${f.signedURL}`);
+      }
+    }
+    return firmados;
+  }
+
+  async function borrarArchivo(nombre) {
+    const token = await permiso();
+    const respuesta = await fetch(
+      `${BASE.url}/storage/v1/object/${BALDE}/${encodeURIComponent(nombre)}`,
+      { method: 'DELETE', headers: { apikey: BASE.clave, Authorization: `Bearer ${token}` } }
+    );
+    if (!respuesta.ok) throw new Error(`${respuesta.status} ${await respuesta.text()}`);
   }
 
   async function borrar(tabla, id) {
@@ -491,6 +589,10 @@
   }
 
   /* ————— Presentación ————— */
+  const pesar = (bytes) => bytes >= 1073741824 ? `${(bytes / 1073741824).toFixed(2)} GB`
+    : bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB`
+    : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+
   const escapar = (t) => String(t == null ? '' : t)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -621,6 +723,238 @@
     setTimeout(() => URL.revokeObjectURL(enlace.href), 1000);
   }
 
+  /* ————— Armar un .zip acá mismo —————
+     Sin comprimir, a propósito: las fotos y los videos ya vienen
+     comprimidos, apretarlos de nuevo no achica nada y tardaría una
+     eternidad. El zip sirve para que todo baje junto en un archivo en vez
+     de en cientos. */
+
+  const TABLA_CRC = (() => {
+    const tabla = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      tabla[n] = c >>> 0;
+    }
+    return tabla;
+  })();
+
+  function crc32(datos) {
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < datos.length; i++) c = TABLA_CRC[(c ^ datos[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function armarZip(piezas) {
+    const aBytes = new TextEncoder();
+    const cuerpo = [];
+    const indice = [];
+    let posicion = 0;
+
+    for (const { nombre, datos } of piezas) {
+      const nombreBytes = aBytes.encode(nombre);
+      const suma = crc32(datos);
+
+      const cabecera = new DataView(new ArrayBuffer(30));
+      cabecera.setUint32(0, 0x04034b50, true);
+      cabecera.setUint16(4, 20, true);       // versión necesaria
+      cabecera.setUint16(6, 0x0800, true);   // nombres en UTF-8
+      cabecera.setUint16(8, 0, true);        // método: guardar tal cual
+      cabecera.setUint16(10, 0, true);       // hora
+      cabecera.setUint16(12, 0x21, true);    // fecha: 1980-01-01
+      cabecera.setUint32(14, suma, true);
+      cabecera.setUint32(18, datos.length, true);
+      cabecera.setUint32(22, datos.length, true);
+      cabecera.setUint16(26, nombreBytes.length, true);
+      cabecera.setUint16(28, 0, true);
+      cuerpo.push(new Uint8Array(cabecera.buffer), nombreBytes, datos);
+
+      const ficha = new DataView(new ArrayBuffer(46));
+      ficha.setUint32(0, 0x02014b50, true);
+      ficha.setUint16(4, 20, true);
+      ficha.setUint16(6, 20, true);
+      ficha.setUint16(8, 0x0800, true);
+      ficha.setUint16(10, 0, true);
+      ficha.setUint16(12, 0, true);
+      ficha.setUint16(14, 0x21, true);
+      ficha.setUint32(16, suma, true);
+      ficha.setUint32(20, datos.length, true);
+      ficha.setUint32(24, datos.length, true);
+      ficha.setUint16(28, nombreBytes.length, true);
+      ficha.setUint32(42, posicion, true);   // dónde empieza en el archivo
+      indice.push(new Uint8Array(ficha.buffer), nombreBytes);
+
+      posicion += 30 + nombreBytes.length + datos.length;
+    }
+
+    const largoIndice = indice.reduce((t, p) => t + p.length, 0);
+    const cierre = new DataView(new ArrayBuffer(22));
+    cierre.setUint32(0, 0x06054b50, true);
+    cierre.setUint16(8, piezas.length, true);
+    cierre.setUint16(10, piezas.length, true);
+    cierre.setUint32(12, largoIndice, true);
+    cierre.setUint32(16, posicion, true);
+
+    return new Blob([...cuerpo, ...indice, new Uint8Array(cierre.buffer)],
+                    { type: 'application/zip' });
+  }
+
+  /* ————— Galería ————— */
+  async function pintarGaleria() {
+    const bloque = $('#bloqueGaleria');
+    const grilla = $('#galeria');
+    const nota = $('#notaGaleria');
+
+    if (!fotos) { bloque.hidden = true; return; }
+    bloque.hidden = false;
+    grilla.innerHTML = '';
+    nota.textContent = '';
+    $('#galeriaVacia').hidden = fotos.cantidad > 0;
+    $('#botonBajarTodo').hidden = fotos.cantidad === 0;
+    if (!fotos.cantidad) return;
+
+    // El balde es privado, así que para poder mostrarlos hacen falta links
+    // temporales: una etiqueta <img> no puede mandar la contraseña.
+    let enlaces;
+    try {
+      enlaces = await firmar(fotos.archivos.map((a) => a.nombre));
+    } catch (error) {
+      console.error(error);
+      nota.textContent = 'No pudimos abrir las vistas previas. Probá con «Actualizar».';
+      return;
+    }
+
+    for (const archivo of fotos.archivos) {
+      const url = enlaces.get(archivo.nombre);
+      if (!url) continue;
+
+      const celda = document.createElement('div');
+      celda.className = 'pieza';
+
+      if (archivo.tipo.startsWith('video/')) {
+        const video = document.createElement('video');
+        video.className = 'pieza__medio';
+        video.src = url;
+        video.preload = 'metadata';   // sólo el primer cuadro hasta que lo toquen
+        video.controls = true;
+        video.playsInline = true;
+        celda.append(video);
+
+        const rotulo = document.createElement('span');
+        rotulo.className = 'pieza__rotulo';
+        rotulo.textContent = pesar(archivo.bytes);
+        celda.append(rotulo);
+      } else {
+        const enlace = document.createElement('a');
+        enlace.href = url;
+        enlace.target = '_blank';
+        enlace.rel = 'noopener';
+        const img = document.createElement('img');
+        img.className = 'pieza__medio';
+        img.src = url;
+        img.alt = '';
+        img.loading = 'lazy';         // sin esto, mil fotos cargan de golpe
+        img.decoding = 'async';
+        enlace.append(img);
+        celda.append(enlace);
+      }
+
+      const quitar = document.createElement('button');
+      quitar.className = 'pieza__quitar';
+      quitar.type = 'button';
+      quitar.textContent = '✕';
+      quitar.title = 'Borrar';
+      quitar.setAttribute('aria-label', `Borrar ${archivo.nombre}`);
+      quitar.addEventListener('click', async () => {
+        if (!confirm('¿Borrar este archivo? No se puede deshacer.')) return;
+        quitar.disabled = true;
+        try {
+          await borrarArchivo(archivo.nombre);
+          celda.remove();
+          fotos.archivos = fotos.archivos.filter((a) => a.nombre !== archivo.nombre);
+          fotos.cantidad = fotos.archivos.length;
+          fotos.bytes = Math.max(0, fotos.bytes - archivo.bytes);
+          pintarCifras();
+          ponerResumen();
+        } catch (error) {
+          console.error(error);
+          quitar.disabled = false;
+          nota.textContent = 'No se pudo borrar. Probá de nuevo.';
+        }
+      });
+      celda.append(quitar);
+      grilla.append(celda);
+    }
+
+    ponerResumen();
+  }
+
+  function ponerResumen() {
+    if (!fotos) return;
+    $('#notaGaleria').textContent =
+      `${fotos.cantidad} archivo${fotos.cantidad === 1 ? '' : 's'} · ${pesar(fotos.bytes)}. ` +
+      'Las vistas previas caducan a las dos horas: si dejan de verse, tocá «Actualizar».';
+  }
+
+  /* Baja todo en tandas de 300 MB. Un solo zip con la boda entera se come la
+     memoria del navegador y la pestaña se cae justo cuando más duele. */
+  const TANDA_MAXIMA = 300 * 1024 * 1024;
+
+  async function bajarTodo() {
+    if (!fotos || !fotos.cantidad) return;
+    const boton = $('#botonBajarTodo');
+    const nota = $('#notaGaleria');
+
+    const tandas = [];
+    let actual = [], peso = 0;
+    for (const archivo of fotos.archivos) {
+      if (actual.length && peso + archivo.bytes > TANDA_MAXIMA) {
+        tandas.push(actual); actual = []; peso = 0;
+      }
+      actual.push(archivo);
+      peso += archivo.bytes;
+    }
+    if (actual.length) tandas.push(actual);
+
+    boton.disabled = true;
+    try {
+      for (let i = 0; i < tandas.length; i++) {
+        const tanda = tandas[i];
+        const enlaces = await firmar(tanda.map((a) => a.nombre));
+        const piezas = [];
+
+        for (let j = 0; j < tanda.length; j++) {
+          nota.textContent = tandas.length > 1
+            ? `Preparando la parte ${i + 1} de ${tandas.length}: ${j + 1} de ${tanda.length}…`
+            : `Preparando la descarga: ${j + 1} de ${tanda.length}…`;
+          const url = enlaces.get(tanda[j].nombre);
+          if (!url) continue;
+          const respuesta = await fetch(url);
+          if (!respuesta.ok) throw new Error(`bajar: ${respuesta.status}`);
+          piezas.push({ nombre: tanda[j].nombre, datos: new Uint8Array(await respuesta.arrayBuffer()) });
+        }
+
+        const enlace = document.createElement('a');
+        enlace.href = URL.createObjectURL(armarZip(piezas));
+        enlace.download = tandas.length > 1
+          ? `fotos-lean-y-nati-${i + 1}.zip`
+          : 'fotos-lean-y-nati.zip';
+        enlace.click();
+        setTimeout((u) => URL.revokeObjectURL(u), 120000, enlace.href);
+        piezas.length = 0;
+      }
+
+      nota.textContent = tandas.length > 1
+        ? `Listo: se descargaron ${tandas.length} archivos .zip. Si el navegador pidió permiso para bajar varios, hay que aceptarlo.`
+        : 'Listo, ya se descargó.';
+    } catch (error) {
+      console.error(error);
+      nota.textContent = 'No se pudo preparar la descarga. Probá de nuevo.';
+    } finally {
+      boton.disabled = false;
+    }
+  }
+
   /* ————— Carga ————— */
   async function cargar() {
     const aviso = $('#avisoPanel');
@@ -634,6 +968,7 @@
       pintarConfirmaciones();
       pintarCanciones();
       pintarPendientes();
+      await pintarGaleria();
       $('#actualizado').textContent = 'Actualizado ' + new Date().toLocaleString('es-AR',
         { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
     } catch (error) {
@@ -704,6 +1039,7 @@
   });
 
   $('#botonRecargar').addEventListener('click', cargar);
+  $('#botonBajarTodo').addEventListener('click', bajarTodo);
   $('#botonSalir').addEventListener('click', () => { olvidarSesion(); mostrarAcceso(); });
   $('#buscador').addEventListener('input', pintarConfirmaciones);
 
