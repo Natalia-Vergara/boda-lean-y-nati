@@ -263,12 +263,23 @@ muchísimo — y encima la noche de la boda, que es cuando más se mira.
 
 - Nombre: `fotos-invitados`
 - **Public bucket: NO** (así nadie puede mirar las fotos de los demás)
-- *Additional configuration* → **Restrict file upload size**: 500 MB
-- *Allowed MIME types*: `image/*,video/*`
+- *Additional configuration* → **Restrict file upload size**: 50 MB
+- *Restrict MIME types*: `image/*,video/*`
 
-Ese tope de 500 MB tiene que coincidir con `CONFIG.pesoMaximoVideo` en
-`fotos.html`. Si acá entra y allá no, el invitado espera toda la subida para
-recibir un error; con los dos iguales, se le avisa antes de empezar.
+El tope por archivo vive en **tres lugares que tienen que coincidir**:
+
+1. el límite global del proyecto (*Storage → Settings → Upload file size
+   limit*), que en el plan gratuito es de **50 MB** y no se puede superar;
+2. el del balde, que no puede pasar al global;
+3. `CONFIG.pesoMaximoVideo` en `fotos.html`.
+
+Si el de la página es más alto que el de Supabase, el invitado espera toda
+la subida para recibir un error. Con los tres iguales, se le avisa antes de
+empezar. **Al contratar Pro hay que subir los tres, en ese orden** — primero
+el global, si no el balde no deja.
+
+El nombre del balde es lo único que no se puede cambiar después; el tamaño y
+los tipos permitidos se editan cuando haga falta.
 
 **2. Los permisos.** En el *SQL Editor*, cambiando el correo por el real:
 

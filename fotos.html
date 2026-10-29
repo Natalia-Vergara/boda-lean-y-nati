@@ -280,11 +280,18 @@
     ladoMaximo: 2000,
     calidad: 0.82,
 
-    // Los videos no se pueden achicar en el navegador —el canvas sólo sabe
-    // de imágenes—, así que viajan tal cual. Este tope tiene que coincidir
-    // con el del balde en Supabase: si acá entra y allá no, el invitado
-    // espera toda la subida para recibir un error. Mejor avisarle antes.
-    pesoMaximoVideo: 500 * 1024 * 1024,
+    /* Los videos no se pueden achicar en el navegador —el canvas sólo sabe
+       de imágenes—, así que viajan tal cual.
+
+       Este tope tiene que coincidir con el del balde en Supabase: si acá
+       entra y allá no, el invitado espera toda la subida para recibir un
+       error. Mejor avisarle antes de empezar.
+
+       Van 50 MB porque es el techo del plan gratuito, que es un límite
+       global del proyecto y el balde no lo puede superar. Al pasar a Pro se
+       sube el límite global, después el del balde, y recién entonces este
+       número: los tres, o no sirve de nada. */
+    pesoMaximoVideo: 50 * 1024 * 1024,
   };
 
   const esVideo = (archivo) => archivo.type.startsWith('video/');
