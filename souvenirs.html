@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tarjetas de souvenir · Lean &amp; Nati</title>
+  <meta name="description" content="Tarjetas de agradecimiento para los souvenirs.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <style>
+    /* ============================================================
+       TARJETAS DE SOUVENIR — agradecimiento, una por invitado
+       ------------------------------------------------------------
+       El arco es el marco dibujado, no la forma de la tarjeta. La
+       tarjeta es rectangular a propósito: recortar ochenta arcos a
+       mano es un suplicio, y con el arco adentro se ve igual pero se
+       corta con tijera derecha.
+
+       Seis por hoja A4, en tres columnas de 70 mm y dos filas de
+       148,5 mm. Entra exacta, así que son dos cortes verticales y uno
+       horizontal, y no queda ningún borde para recortar.
+
+       Sin fondo de color: en una impresora de casa un fondo lleno sale
+       manchado y gasta muchísima tinta. El color lo pone el papel.
+       ============================================================ */
+    :root {
+      --papel:      #FBF8F2;
+      --tinta:      #3D2E2A;
+      --tinta-suave:#6B5750;
+      --tinta-tenue:#8C7970;
+      --bordo:      #61152A;
+      --dorado:     #A98B54;
+      --linea:      #E4D9C6;
+      --escritorio: #E7E1D7;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+      margin: 0;
+      background: var(--escritorio);
+      color: var(--tinta);
+      font-family: 'Poppins', system-ui, sans-serif;
+      font-weight: 300;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ——————————————————— Pantalla ——————————————————— */
+    .guia { max-width: 44rem; margin: 0 auto; padding: 2.6rem 1.25rem 1.5rem; }
+    .guia__marca {
+      font-family: 'Pinyon Script', cursive;
+      font-size: 2rem; line-height: 1; color: var(--bordo); margin: 0 0 0.8rem;
+    }
+    .guia h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 600; font-size: clamp(1.8rem, 6vw, 2.4rem);
+      line-height: 1.15; margin: 0 0 0.6rem; text-wrap: balance;
+    }
+    .guia p  { margin: 0 0 0.9rem; color: var(--tinta-suave); max-width: 54ch; }
+    .guia ol { margin: 0 0 1.4rem; padding-left: 1.2rem; color: var(--tinta-suave); max-width: 54ch; }
+    .guia li { margin-bottom: 0.5rem; }
+    .guia strong { font-weight: 500; color: var(--tinta); }
+    .imprimir {
+      font-family: 'Poppins', system-ui, sans-serif;
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: #FBF8F2; background: var(--bordo);
+      border: 0; border-radius: 100px;
+      padding: 0.85rem 1.6rem; cursor: pointer;
+    }
+    .imprimir:hover { background: #7C1830; }
+    .imprimir:focus-visible { outline: 2px solid var(--dorado); outline-offset: 2px; }
+    .rotulo {
+      max-width: 44rem; margin: 2.4rem auto 0.7rem; padding: 0 1.25rem;
+      font-size: 0.64rem; font-weight: 500; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--tinta-tenue);
+    }
+    .marco-hoja { padding: 0 1.25rem 4rem; display: flex; justify-content: center; }
+
+    /* ——————————————————— La hoja ——————————————————— */
+    .hoja {
+      position: relative;
+      width: 210mm; height: 297mm;
+      background: #FFFFFF;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: 148.5mm;
+      box-shadow: 0 18px 50px -24px rgba(61, 46, 42, 0.55);
+    }
+    .corte {
+      position: absolute; pointer-events: none;
+      border-color: var(--linea); border-style: dashed;
+    }
+    .corte--v { top: 0; bottom: 0; border-left-width: 0.2mm; }
+    .corte--h { left: 0; right: 0; top: 50%; border-top-width: 0.2mm; }
+
+    /* ——————————————————— La tarjeta ——————————————————— */
+    .tarjeta {
+      position: relative;
+      overflow: hidden;
+      padding: 5mm;
+    }
+
+    /* El arco: un filete fino y otro más fino adentro, como en las
+       tarjetas de papelería clásicas. El radio es la mitad del ancho
+       del marco, que es lo que lo vuelve un semicírculo y no una
+       esquina redondeada. */
+    .arco {
+      position: absolute; inset: 5mm;
+      border: 0.3mm solid var(--dorado);
+      border-radius: 30mm 30mm 1.5mm 1.5mm;
+    }
+    .arco::after {
+      content: ''; position: absolute; inset: 1.5mm;
+      border: 0.18mm solid var(--dorado); opacity: 0.55;
+      border-radius: 28.5mm 28.5mm 1mm 1mm;
+    }
+
+    .cuerpo {
+      position: relative; height: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center;
+      padding: 12mm 9mm 8mm;
+    }
+    /* Nada se encoge. Sin esto, cuando el contenido no entra, los dibujos
+       —que no traen alto propio— se aplastan a cero y desaparecen sin que
+       nada avise: el texto queda entero y los adornos no están. */
+    .cuerpo > * { flex: none; }
+
+    .sello { width: 10mm; height: 10mm; color: var(--dorado); display: block; }
+    .sello__texto {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 26px; fill: var(--bordo); letter-spacing: 1px;
+    }
+
+    .gracias {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 600; font-size: 13pt; line-height: 1;
+      letter-spacing: 0.3em; text-indent: 0.3em;
+      color: var(--bordo);
+      margin: 3.5mm 0 0;
+    }
+
+    .filigrana { width: 20mm; height: 2mm; color: var(--dorado); margin: 3.2mm 0 0; display: block; }
+
+    .texto {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 500; font-size: 6.9pt; line-height: 1.65;
+      color: var(--tinta-suave);
+      margin: 4mm 0 0;
+      text-wrap: pretty;
+    }
+    .texto + .texto { margin-top: 2.2mm; }
+
+    .despedida {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-weight: 500; font-size: 6.9pt; line-height: 1.5;
+      color: var(--tinta-suave);
+      margin: 4.5mm 0 0;
+    }
+    .firma {
+      font-family: 'Pinyon Script', cursive;
+      font-size: 15pt; line-height: 1.15;
+      color: var(--bordo);
+      margin: 1mm 0 0;
+    }
+
+    .ramita { width: 28mm; height: 3.5mm; color: var(--dorado); margin: 4mm 0 0; display: block; }
+    .ramita__corazon { fill: var(--bordo); }
+
+    .fecha {
+      font-family: 'Poppins', system-ui, sans-serif;
+      font-size: 6pt; font-weight: 400;
+      letter-spacing: 0.22em;
+      color: var(--tinta-tenue);
+      margin: 2.5mm 0 0;
+    }
+
+    @media (max-width: 900px) { .hoja { zoom: 0.72; } }
+    @media (max-width: 660px) { .hoja { zoom: 0.5;  } }
+    @media (max-width: 470px) { .hoja { zoom: 0.36; } }
+
+    /* ——————————————————— Impresión ——————————————————— */
+    @page { size: A4 portrait; margin: 0; }
+
+    @media print {
+      .guia, .rotulo { display: none !important; }
+      body { background: #FFFFFF; }
+      .marco-hoja { padding: 0; display: block; }
+      .hoja { zoom: 1 !important; box-shadow: none; page-break-after: avoid; }
+      .arco, .gracias, .filigrana, .texto, .firma, .ramita, .fecha, .sello {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="guia">
+    <p class="guia__marca">Lean &amp; Nati</p>
+    <h1>Tarjetas de souvenir</h1>
+    <p>
+      La tarjeta de agradecimiento que va con el souvenir. Mide
+      <strong>70 × 148,5 mm</strong> y entran <strong>seis por hoja</strong>:
+      para ochenta invitados, <strong>catorce hojas</strong> (salen 84, así que
+      quedan cuatro de más).
+    </p>
+    <p>
+      El arco es el <strong>marco dibujado</strong>, no la forma de la tarjeta.
+      La tarjeta es rectangular a propósito: recortar ochenta arcos a mano es un
+      suplicio, y así se ve igual pero se corta con tijera derecha.
+    </p>
+    <ol>
+      <li>Tamaño <strong>A4</strong>, sin márgenes y al 100 %. Nada de «ajustar a la página».</li>
+      <li>Marcá <strong>«Gráficos de fondo»</strong> o <em>Background graphics</em>, si no el dorado sale en gris.</li>
+      <li>Cortá las <strong>dos líneas verticales y la horizontal</strong>. Los bordes de la hoja no se cortan: las seis entran justas.</li>
+    </ol>
+    <p>
+      Quedan mucho mejor en <strong>papel de 250 a 300 gramos</strong>, crema o
+      blanco. Van sin fondo de color a propósito: en una impresora de casa un
+      fondo lleno sale manchado y gasta muchísima tinta. El color lo pone el papel.
+    </p>
+    <p>
+      <button class="imprimir" type="button" onclick="window.print()">Imprimir la hoja</button>
+    </p>
+  </div>
+
+  <p class="rotulo">Así sale impreso</p>
+
+  <div class="marco-hoja">
+    <div class="hoja" id="hoja"></div>
+  </div>
+
+  <!-- Los dibujos, una sola vez para toda la página. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <!-- El sello de la invitación -->
+    <symbol id="sello" viewBox="0 0 90 90">
+      <circle cx="45" cy="45" r="42" fill="none" stroke="currentColor" stroke-width="0.9"/>
+      <circle cx="45" cy="45" r="35" fill="none" stroke="currentColor" stroke-width="0.7" stroke-dasharray="2 4"/>
+      <text x="45" y="54" text-anchor="middle" class="sello__texto">L&amp;N</text>
+    </symbol>
+
+    <!-- Filigrana: un filete con un rombo al medio y un punto en cada punta -->
+    <symbol id="filigrana" viewBox="0 0 120 12">
+      <g fill="none" stroke="currentColor" stroke-width="0.9" stroke-linecap="round">
+        <path d="M11 6h38"/>
+        <path d="M71 6h38"/>
+      </g>
+      <g fill="currentColor">
+        <path d="M60 2.1 63.9 6 60 9.9 56.1 6Z"/>
+        <circle cx="6" cy="6" r="1.1"/>
+        <circle cx="114" cy="6" r="1.1"/>
+      </g>
+    </symbol>
+
+    <!-- Ramitas con un corazón en el medio. La de la derecha es la misma
+         espejada, para que queden iguales de los dos lados. -->
+    <symbol id="ramita" viewBox="0 0 160 20">
+      <g id="rama">
+        <path d="M6 16.6C20 16.6 36 13.6 50 7.6"
+              fill="none" stroke="currentColor" stroke-width="0.9" stroke-linecap="round"/>
+        <g fill="currentColor">
+          <path d="M0 0C2.3-1.9 5.6-1.9 7.6 0 5.6 1.9 2.3 1.9 0 0Z" transform="translate(13.5,16.4) rotate(-150)"/>
+          <path d="M0 0C2.3-1.9 5.6-1.9 7.6 0 5.6 1.9 2.3 1.9 0 0Z" transform="translate(23.5,15.3) rotate(-144)"/>
+          <path d="M0 0C2.3-1.9 5.6-1.9 7.6 0 5.6 1.9 2.3 1.9 0 0Z" transform="translate(33.5,13.2) rotate(-138)"/>
+          <path d="M0 0C2.3-1.9 5.6-1.9 7.6 0 5.6 1.9 2.3 1.9 0 0Z" transform="translate(42.5,10.5) rotate(-132)"/>
+        </g>
+      </g>
+      <use href="#rama" transform="translate(160,0) scale(-1,1)"/>
+      <path class="ramita__corazon"
+            d="M80 16.6C78 14.8 74.4 12.1 74.4 9.2 74.4 7.4 75.8 6 77.6 6 78.6 6 79.5 6.5 80 7.3
+               80.5 6.5 81.4 6 82.4 6 84.2 6 85.6 7.4 85.6 9.2 85.6 12.1 82 14.8 80 16.6Z"/>
+    </symbol>
+  </svg>
+
+  <template id="molde">
+    <div class="tarjeta">
+      <span class="arco" aria-hidden="true"></span>
+      <div class="cuerpo">
+        <svg class="sello" aria-hidden="true"><use href="#sello"/></svg>
+
+        <h2 class="gracias">GRACIAS</h2>
+        <svg class="filigrana" viewBox="0 0 120 12" aria-hidden="true"><use href="#filigrana"/></svg>
+
+        <p class="texto">Hoy celebramos el comienzo de una nueva etapa.</p>
+        <p class="texto">
+          Y no podríamos haber imaginado hacerlo de una manera más linda que
+          rodeados de las personas que queremos.
+        </p>
+        <p class="texto">
+          Gracias por estar, por acompañarnos y por ser parte de este día que
+          quedará para siempre en nuestra memoria. Cada abrazo, cada sonrisa y
+          cada muestra de cariño hicieron que esta celebración fuera todavía
+          más especial.
+        </p>
+        <p class="texto">
+          Les dejamos un pequeño detalle para llevarse un poquito de la dulzura
+          y la felicidad que sentimos hoy.
+        </p>
+
+        <p class="despedida">Con amor,</p>
+        <p class="firma">Nati &amp; Lean</p>
+
+        <svg class="ramita" viewBox="0 0 160 20" aria-hidden="true"><use href="#ramita"/></svg>
+        <p class="fecha">27.11.2026</p>
+      </div>
+    </div>
+  </template>
+
+  <script>
+  'use strict';
+  /* Las seis tarjetas son idénticas: se clonan de un mismo molde, así el
+     texto vive en un solo lugar y no se pueden desincronizar. */
+  (function armarHoja() {
+    const hoja = document.getElementById('hoja');
+    const molde = document.getElementById('molde');
+    const COLUMNAS = 3, FILAS = 2;
+
+    for (let i = 0; i < COLUMNAS * FILAS; i++) {
+      hoja.append(molde.content.cloneNode(true));
+    }
+
+    for (let i = 1; i < COLUMNAS; i++) {
+      const corte = document.createElement('span');
+      corte.className = 'corte corte--v';
+      corte.style.left = (i * 100 / COLUMNAS) + '%';
+      corte.setAttribute('aria-hidden', 'true');
+      hoja.append(corte);
+    }
+    const corte = document.createElement('span');
+    corte.className = 'corte corte--h';
+    corte.setAttribute('aria-hidden', 'true');
+    hoja.append(corte);
+  })();
+  </script>
+
+</body>
+</html>

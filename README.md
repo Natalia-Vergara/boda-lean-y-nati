@@ -491,6 +491,27 @@ python3 -m http.server 8080
 
 Diseño y desarrollo a medida para Lean & Nati. Paleta inspirada en su moodboard: bordó profundo, vino, marfil, champagne y dorado — el bordó de las damas de honor como acento principal.
 
+### Las tarjetas de souvenir
+
+[`souvenirs.html`](souvenirs.html) es la tarjeta de agradecimiento que va con
+el souvenir: **70 × 148,5 mm**, seis por hoja A4, catorce hojas para ochenta.
+
+El **arco es el marco dibujado, no la forma de la tarjeta**. La tarjeta es
+rectangular a propósito: recortar ochenta arcos a mano es un suplicio, y con
+el arco adentro se ve igual pero se corta con tijera derecha. El radio del
+arco es la mitad del ancho del marco, que es lo que lo vuelve un semicírculo
+y no una esquina redondeada.
+
+El sello «L&N» es el mismo de la sección de confirmación de la invitación.
+La filigrana y las ramitas están dibujadas acá, en `<symbol>`: la ramita
+derecha es la izquierda espejada, para que queden iguales de los dos lados.
+
+Una trampa que costó encontrar: `.cuerpo` es un contenedor flexible, y
+cuando el contenido no entra, los elementos con `flex-shrink` por defecto se
+encogen. Los dibujos no traen alto propio, así que **se aplastaban a cero y
+desaparecían sin que nada avisara** — el texto quedaba entero y los adornos
+no estaban. De ahí el `.cuerpo > * { flex: none }`.
+
 ## Cerrar las confirmaciones
 
 Cuando pasa la fecha límite, en `script.js`:
